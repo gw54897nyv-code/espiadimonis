@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}{{ factura.numero }} — Espiadimonis{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <a href="/facturacio/" class="btn btn-sm btn-outline-secondary me-2">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <h2 class="d-inline"><i class="bi bi-receipt text-warning"></i> {{ factura.numero }}</h2>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="/facturacio/{{ factura.pk }}/pdf/" class="btn btn-danger">
+      <i class="bi bi-file-pdf"></i> Descarregar PDF
+    </a>
+    <a href="/facturacio/{{ factura.pk }}/editar/" class="btn btn-outline-primary">
+      <i class="bi bi-pencil"></i> Editar
+    </a>
+    <a href="/facturacio/{{ factura.pk }}/eliminar/" class="btn btn-outline-danger">
+      <i class="bi bi-trash"></i>
+    </a>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <dl class="mb-0">
+          <dt class="text-muted small">Tipus</dt>
+          <dd>
+            <span class="badge bg-{% if factura.tipus == 'FACTURA' %}primary{% else %}secondary{% endif %} fs-6">
+              {{ factura.get_tipus_display }}
+            </span>
+          </dd>
+          <dt class="text-muted small mt-2">Estat</dt>
+          <dd>
+            {% if factura.estat == 'PENDENT' %}<span class="badge bg-warning text-dark fs-6">Pendent</span>
+            {% elif factura.estat == 'PAGAT' %}<span class="badge bg-success fs-6">Pagat</span>
+            {% else %}<span class="badge bg-secondary fs-6">Cancel·lat</span>{% endif %}
+          </dd>
+          <dt class="text-muted small mt-2">Data</dt>
+          <dd>{{ factura.data|date:"d/m/Y" }}</dd>
+          <dt class="text-muted small mt-2">IVA</dt>
+          <dd>{{ factura.iva }}%</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white fw-semibold">Client</div>
+      <div class="card-body">
+        <p class="fw-semibold mb-1">{{ factura.client }}</p>
+        <p class="text-muted mb-0" style="white-space:pre-line">{{ factura.adreca_client }}</p>
+      </div>
+    </div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-semibold">Línies</div>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Descripció</th>
+              <th class="text-end">Quantitat</th>
+              <th class="text-end">Preu unit.</th>
+              <th class="text-end">Import</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for linia in factura.linies.all %}
+            <tr>
+              <td>{{ linia.descripcio }}</td>
+              <td class="text-end">{{ linia.quantitat|floatformat:2 }}</td>
+              <td class="text-end">{{ linia.preu_unitari|floatformat:2 }} €</td>
+              <td class="text-end fw-semibold">{{ linia.import_linia|floatformat:2 }} €</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot class="table-light">
+            <tr>
+              <td colspan="3" class="text-end">Subtotal</td>
+              <td class="text-end">{{ factura.subtotal|floatformat:2 }} €</td>
+            </tr>
+            <tr>
+              <td colspan="3" class="text-end">IVA ({{ factura.iva }}%)</td>
+              <td class="text-end">{{ factura.import_iva|floatformat:2 }} €</td>
+            </tr>
+            <tr class="fw-bold">
+              <td colspan="3" class="text-end">TOTAL</td>
+              <td class="text-end fs-5">{{ factura.total|floatformat:2 }} €</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+    {% if factura.notes %}
+    <div class="card border-0 shadow-sm mt-3">
+      <div class="card-header bg-white fw-semibold">Notes</div>
+      <div class="card-body text-muted" style="white-space:pre-line">{{ factura.notes }}</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

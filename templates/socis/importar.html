@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Importar socis — {{ conf.nom_colla }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex align-items-center gap-2">
+    <a href="/socis/" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+    <h2 class="mb-0"><i class="bi bi-upload"></i> Importar socis des de CSV</h2>
+  </div>
+  <a href="/socis/importar/plantilla/" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-download"></i> Descarregar plantilla CSV
+  </a>
+</div>
+
+<div class="row">
+  <div class="col-md-7">
+    <div class="card mb-4">
+      <div class="card-header"><i class="bi bi-file-earmark-csv"></i> Puja el fitxer CSV</div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Fitxer CSV</label>
+            <input type="file" name="fitxer_csv" class="form-control" accept=".csv" required>
+            <div class="form-text">Format UTF-8 o compatible amb Excel (BOM). Usa la plantilla si no tens el format.</div>
+          </div>
+          <button type="submit" class="btn btn-brand">
+            <i class="bi bi-upload"></i> Importar
+          </button>
+        </form>
+      </div>
+    </div>
+
+    {% if resultats %}
+    <div class="card mb-4">
+      <div class="card-header"><i class="bi bi-clipboard-data"></i> Resultat de la importació</div>
+      <div class="card-body">
+        {% if resultats.importats %}
+        <div class="alert alert-success py-2">
+          <i class="bi bi-check-circle-fill"></i>
+          <strong>{{ resultats.importats }}</strong> soci{% if resultats.importats != 1 %}s{% endif %} importat{% if resultats.importats != 1 %}s{% endif %} correctament.
+        </div>
+        {% endif %}
+        {% if resultats.errors %}
+        <div class="alert alert-warning py-2 mb-2">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <strong>{{ resultats.errors|length }}</strong> fila{% if resultats.errors|length != 1 %}es{% endif %} amb errors.
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for err in resultats.errors %}
+          <li class="list-group-item list-group-item-warning small py-1">{{ err }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-md-5">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-info-circle"></i> Instruccions</div>
+      <div class="card-body small">
+        <p>El fitxer CSV ha de tenir les columnes següents (la primera fila és la capçalera):</p>
+        <table class="table table-sm table-bordered">
+          <thead class="table-dark"><tr><th>Camp</th><th>Obligatori</th></tr></thead>
+          <tbody>
+            <tr><td><code>email</code></td><td><span class="badge bg-danger">Sí</span></td></tr>
+            <tr><td><code>nom</code></td><td><span class="badge bg-danger">Sí</span></td></tr>
+            <tr><td><code>cognoms</code></td><td></td></tr>
+            <tr><td><code>numero_soci</code></td><td></td></tr>
+            <tr><td><code>data_alta</code></td><td></td></tr>
+            <tr><td><code>dni</code></td><td></td></tr>
+            <tr><td><code>data_naixement</code></td><td></td></tr>
+            <tr><td><code>adreca</code></td><td></td></tr>
+            <tr><td><code>codi_postal</code></td><td></td></tr>
+            <tr><td><code>ciutat</code></td><td></td></tr>
+            <tr><td><code>telefon</code></td><td></td></tr>
+            <tr><td><code>tipus</code></td><td><small>DIMONIS o BATUCADA</small></td></tr>
+            <tr><td><code>rol</code></td><td><small>soci o junta</small></td></tr>
+            <tr><td><code>data_baixa</code></td><td></td></tr>
+          </tbody>
+        </table>
+        <p class="mb-1"><strong>Formats de data acceptats:</strong></p>
+        <ul class="mb-2">
+          <li><code>YYYY-MM-DD</code> (ex: 2024-01-15)</li>
+          <li><code>DD/MM/YYYY</code> (ex: 15/01/2024)</li>
+          <li><code>DD-MM-YYYY</code> (ex: 15-01-2024)</li>
+        </ul>
+        <p class="text-muted mb-0">
+          <i class="bi bi-info-circle"></i>
+          Si el soci ja existeix (mateix email), s'actualitzen les dades.
+          Si no té compte d'accés, es crea automàticament.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

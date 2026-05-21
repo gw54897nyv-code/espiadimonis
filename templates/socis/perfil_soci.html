@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+{% block title %}El meu perfil — {{ conf.nom_colla }}{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center gap-2 mb-4">
+  <h2 class="mb-0"><i class="bi bi-person-circle text-brand-red"></i> El meu perfil</h2>
+</div>
+
+<!-- Avís DNI -->
+{% if estat_dni == 'caducat' %}
+<div class="alert alert-danger d-flex align-items-center gap-2 py-2">
+  <i class="bi bi-exclamation-octagon-fill fs-5"></i>
+  <strong>DNI CADUCAT</strong> — El document va caducar el {{ soci.data_caducitat_dni|date:"d/m/Y" }}. Cal renovar-lo.
+</div>
+{% elif estat_dni == 'aviat' %}
+<div class="alert alert-warning d-flex align-items-center gap-2 py-2">
+  <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+  <strong>DNI caduca aviat</strong> — Caduca el {{ soci.data_caducitat_dni|date:"d/m/Y" }}. Recorda renovar-lo.
+</div>
+{% endif %}
+
+<div class="row g-3">
+
+  <!-- Columna esquerra -->
+  <div class="col-md-4">
+
+    <!-- Foto + dades bàsiques -->
+    <div class="card text-center p-3 mb-3">
+      {% if soci.foto %}
+        <img src="{{ soci.foto.url }}" class="rounded-circle mx-auto mb-3"
+             style="width:100px;height:100px;object-fit:cover;border:3px solid #cc0000;">
+      {% else %}
+        <div class="mx-auto mb-3 rounded-circle bg-dark d-flex align-items-center justify-content-center"
+             style="width:100px;height:100px;border:3px solid #cc0000;">
+          <i class="bi bi-person display-5 text-white"></i>
+        </div>
+      {% endif %}
+      <div class="fw-bold fs-5">{{ soci.nom_complet }}</div>
+      <span class="badge {% if soci.tipus == 'DIMONIS' %}bg-danger{% else %}bg-dark{% endif %} mb-2">
+        {{ soci.get_tipus_display }}
+      </span>
+      {% if soci.numero_soci %}
+      <div class="text-muted small mb-2">Soci #{{ soci.numero_soci }}</div>
+      {% endif %}
+      <dl class="text-start small mb-0">
+        <dt class="text-muted">Email</dt><dd>{{ soci.email }}</dd>
+        {% if soci.telefon %}
+        <dt class="text-muted">Telèfon</dt><dd>{{ soci.telefon }}</dd>
+        {% endif %}
+        {% if soci.dni %}
+        <dt class="text-muted">DNI / NIE</dt>
+        <dd>
+          {{ soci.dni }}
+          {% if soci.data_caducitat_dni %}
+          · <small class="{% if estat_dni == 'caducat' %}text-danger fw-bold{% elif estat_dni == 'aviat' %}text-warning fw-bold{% else %}text-muted{% endif %}">
+            cad. {{ soci.data_caducitat_dni|date:"d/m/Y" }}
+            {% if estat_dni == 'caducat' %}<strong>(CADUCAT)</strong>{% elif estat_dni == 'aviat' %}(aviat){% endif %}
+          </small>
+          {% endif %}
+        </dd>
+        {% endif %}
+        {% if soci.data_naixement %}
+        <dt class="text-muted">Naixement</dt><dd>{{ soci.data_naixement|date:"d/m/Y" }}</dd>
+        {% endif %}
+        {% if soci.adreca %}
+        <dt class="text-muted">Adreça</dt><dd>{{ soci.adreca_completa }}</dd>
+        {% endif %}
+        <dt class="text-muted">Alta</dt><dd>{{ soci.data_alta|date:"d/m/Y"|default:'—' }}</dd>
+      </dl>
+    </div>
+
+    <!-- Carnet inline -->
+    <div class="card mb-3">
+      <div class="card-header">
+        <i class="bi bi-credit-card"></i> Carnet {{ any_actual }}
+      </div>
+      <div class="card-body p-0">
+        <div class="carnet carnet-sm mx-auto my-3">
+          <div class="carnet-header">
+            {% if conf.logo %}
+            <img src="{{ conf.logo.url }}" alt="Logo" style="height:22px;width:auto;">
+            {% else %}
+            <i class="bi bi-fire text-white"></i>
+            {% endif %}
+            <div>
+              <div style="font-size:0.75rem;font-weight:700;color:#fff;">{{ conf.nom_colla }}</div>
+              <div style="font-size:0.58rem;color:rgba(255,255,255,0.7);letter-spacing:0.08em;text-transform:uppercase;">Carnet de Soci {{ any_actual }}</div>
+            </div>
+          </div>
+          <div class="carnet-body">
+            {% if soci.foto %}
+              <img src="{{ soci.foto.url }}" class="carnet-foto" alt="Foto" style="width:52px;height:52px;">
+            {% else %}
+              <div class="carnet-foto-placeholder" style="width:52px;height:52px;">
+                <i class="bi bi-person text-white"></i>
+              </div>
+            {% endif %}
+            <div class="carnet-info">
+              <div class="num" style="font-size:0.72rem;">#{{ soci.numero_soci }}</div>
+              <div class="nom" style="font-size:0.9rem;">{{ soci.nom_complet }}</div>
+              <div class="tipus" style="font-size:0.7rem;">{{ soci.get_tipus_display }}</div>
+              {% if soci.dni %}<div class="dni" style="font-size:0.65rem;">{{ soci.dni }}</div>{% endif %}
+            </div>
+          </div>
+          <div class="carnet-checks">
+            <span class="carnet-check {% if soci.te_curs_pirotecnia %}ok{% else %}ko{% endif %}">
+              <i class="bi bi-fire"></i> CREE
+            </span>
+            <span class="carnet-check {% if soci.proteccio_dades_firmada %}ok{% else %}ko{% endif %}">
+              <i class="bi bi-shield-check"></i> LOPD
+            </span>
+            {% if soci.es_menor %}
+            <span class="carnet-check {% if soci.permis_pare_signat %}ok{% else %}ko{% endif %}">
+              <i class="bi bi-people"></i> Permís
+            </span>
+            {% endif %}
+            <span class="carnet-check {% if soci.actiu %}ok{% else %}ko{% endif %}">
+              <i class="bi bi-person-check"></i> {% if soci.actiu %}Actiu{% else %}Baixa{% endif %}
+            </span>
+          </div>
+          <div class="carnet-footer">
+            <span>Alta: {{ soci.data_alta|date:"d/m/Y" }}</span>
+            <span>{{ any_actual }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documentació obligatòria -->
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-shield-check"></i> Documentació obligatòria</div>
+      <div class="card-body d-flex flex-column gap-2 pb-2">
+
+        <!-- DNI -->
+        <div class="doc-indicator {% if soci.dni and estat_dni == 'ok' %}ok{% elif soci.dni and estat_dni == 'aviat' %}warning{% elif soci.dni and estat_dni == 'caducat' %}ko{% elif soci.dni %}ok{% else %}ko{% endif %}">
+          <i class="bi bi-{% if not soci.dni %}x-circle-fill{% elif estat_dni == 'caducat' %}x-circle-fill{% elif estat_dni == 'aviat' %}exclamation-circle-fill{% else %}check-circle-fill{% endif %}"></i>
+          <span class="flex-grow-1">DNI / NIE
+            {% if soci.data_caducitat_dni %}
+            · <small class="{% if estat_dni == 'caducat' %}text-danger fw-bold{% elif estat_dni == 'aviat' %}text-warning{% else %}text-muted{% endif %}">
+              cad. {{ soci.data_caducitat_dni|date:"d/m/Y" }}
+              {% if estat_dni == 'caducat' %}<strong>(CADUCAT)</strong>{% elif estat_dni == 'aviat' %}(aviat){% endif %}
+            </small>
+            {% endif %}
+          </span>
+          {% if doc_dni %}
+          <a href="{{ doc_dni.fitxer.url }}" target="_blank"
+             class="btn btn-sm btn-outline-secondary py-0 px-1" title="Veure DNI">
+            <i class="bi bi-paperclip"></i>
+          </a>
+          {% endif %}
+        </div>
+
+        <!-- LOPD -->
+        <div class="doc-indicator {% if soci.proteccio_dades_firmada and doc_lopd %}ok{% elif soci.proteccio_dades_firmada %}warning{% else %}ko{% endif %}">
+          <i class="bi bi-{% if soci.proteccio_dades_firmada and doc_lopd %}check-circle-fill{% elif soci.proteccio_dades_firmada %}exclamation-circle-fill{% else %}x-circle-fill{% endif %}"></i>
+          <span class="flex-grow-1">Protecció de dades (LOPD)
+            {% if soci.data_proteccio_dades %}<small class="text-muted">· {{ soci.data_proteccio_dades|date:"d/m/Y" }}</small>{% endif %}
+          </span>
+          {% if doc_lopd %}
+          <a href="{{ doc_lopd.fitxer.url }}" target="_blank"
+             class="btn btn-sm btn-outline-secondary py-0 px-1">
+            <i class="bi bi-paperclip"></i>
+          </a>
+          {% endif %}
+        </div>
+
+        <!-- CREE -->
+        <div class="doc-indicator {% if soci.te_curs_pirotecnia and doc_cree %}ok{% elif soci.te_curs_pirotecnia %}warning{% else %}ko{% endif %}">
+          <i class="bi bi-{% if soci.te_curs_pirotecnia and doc_cree %}check-circle-fill{% elif soci.te_curs_pirotecnia %}exclamation-circle-fill{% else %}x-circle-fill{% endif %}"></i>
+          <span class="flex-grow-1">Curs pirotècnia (CREE)
+            {% if soci.data_curs_pirotecnia %}<small class="text-muted">· {{ soci.data_curs_pirotecnia|date:"d/m/Y" }}</small>{% endif %}
+          </span>
+          {% if doc_cree %}
+          <a href="{{ doc_cree.fitxer.url }}" target="_blank"
+             class="btn btn-sm btn-outline-secondary py-0 px-1">
+            <i class="bi bi-paperclip"></i>
+          </a>
+          {% endif %}
+        </div>
+
+        {% if soci.es_menor %}
+        <!-- Permís pare -->
+        <div class="doc-indicator {% if soci.permis_pare_signat and doc_permis %}ok{% elif soci.permis_pare_signat %}warning{% else %}ko{% endif %}">
+          <i class="bi bi-{% if soci.permis_pare_signat and doc_permis %}check-circle-fill{% elif soci.permis_pare_signat %}exclamation-circle-fill{% else %}x-circle-fill{% endif %}"></i>
+          <span class="flex-grow-1">Permís pare/mare</span>
+          {% if doc_permis %}
+          <a href="{{ doc_permis.fitxer.url }}" target="_blank"
+             class="btn btn-sm btn-outline-secondary py-0 px-1">
+            <i class="bi bi-paperclip"></i>
+          </a>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        {% if soci.documentacio_completa %}
+        <div class="text-center mt-1">
+          <span class="badge bg-success px-3 py-2"><i class="bi bi-shield-fill-check"></i> Documentació completa</span>
+        </div>
+        {% else %}
+        <div class="text-center mt-1">
+          <span class="badge bg-danger px-3 py-2"><i class="bi bi-shield-fill-x"></i> Documentació incompleta</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Columna dreta: documents -->
+  <div class="col-md-8">
+
+    <!-- Documents adjunts -->
+    <div class="card">
+      <div class="card-header"><i class="bi bi-folder"></i> Els meus documents</div>
+      <ul class="list-group list-group-flush">
+        {% for doc in documents %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <span class="badge bg-secondary me-2">{{ doc.get_tipus_display }}</span>
+            <a href="{{ doc.fitxer.url }}" target="_blank">{{ doc.nom }}</a>
+            <small class="text-muted ms-2">{{ doc.data_pujada|date:"d/m/Y" }}</small>
+          </div>
+          <a href="{{ doc.fitxer.url }}" target="_blank"
+             class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-download"></i>
+          </a>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted small">Sense documents adjunts.</li>
+        {% endfor %}
+      </ul>
+      <div class="card-footer bg-white">
+        <form method="post" action="{% url 'el_meu_perfil' %}" enctype="multipart/form-data"
+              class="row g-2 align-items-end">
+          {% csrf_token %}
+          <div class="col-auto">
+            <select name="tipus" class="form-select form-select-sm">
+              <option value="PROTECCIO">Protecció dades (LOPD)</option>
+              <option value="CREE">Curs CREE</option>
+              {% if soci.es_menor %}<option value="PERMIS_PARE">Permís pare/mare</option>{% endif %}
+              <option value="DNI">DNI / NIE</option>
+              <option value="ALTRE">Altre</option>
+            </select>
+          </div>
+          <div class="col">
+            <input type="text" name="nom" class="form-control form-control-sm"
+                   placeholder="Nom del document" required>
+          </div>
+          <div class="col-auto">
+            <input type="file" name="fitxer" class="form-control form-control-sm" required>
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-sm btn-brand">
+              <i class="bi bi-upload"></i> Pujar
+            </button>
+          </div>
+        </form>
+        <small class="text-muted mt-1 d-block">
+          <i class="bi bi-info-circle"></i>
+          Puja el teu DNI, LOPD o CREE per completar la documentació.
+        </small>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

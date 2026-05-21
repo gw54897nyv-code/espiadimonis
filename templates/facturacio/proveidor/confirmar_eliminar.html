@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Eliminar factura proveïdor — {{ conf.nom_colla }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card border-danger">
+      <div class="card-header bg-danger text-white">
+        <i class="bi bi-exclamation-triangle"></i> Confirmar eliminació
+      </div>
+      <div class="card-body">
+        <p>Segur que vols eliminar la factura de <strong>{{ factura.proveidor }}</strong> — {{ factura.descripcio }}?</p>
+        <form method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-trash"></i> Eliminar
+          </button>
+          <a href="{% url 'llista_factures_proveidor' %}" class="btn btn-outline-secondary ms-2">Cancel·lar</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

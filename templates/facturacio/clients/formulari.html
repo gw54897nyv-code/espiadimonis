@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}{{ accio }} client — {{ conf.nom_colla }}{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center gap-2 mb-4">
+  <a href="/facturacio/clients/" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+  <h3 class="mb-0">{{ accio }} client</h3>
+</div>
+<div class="card" style="max-width:550px">
+  <div class="card-body p-4">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-12"><label class="form-label fw-semibold">Nom *</label>{{ form.nom }}</div>
+        <div class="col-md-6"><label class="form-label fw-semibold">NIF / CIF</label>{{ form.nif }}</div>
+        <div class="col-md-6"><label class="form-label fw-semibold">Telèfon</label>{{ form.telefon }}</div>
+        <div class="col-12"><label class="form-label fw-semibold">Email</label>{{ form.email }}</div>
+        <div class="col-12"><label class="form-label fw-semibold">Adreça</label>{{ form.adreca }}</div>
+      </div>
+      <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-brand"><i class="bi bi-save"></i> Desar</button>
+        <a href="/facturacio/clients/" class="btn btn-outline-secondary">Cancel·lar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Canviar contrasenya — {{ soci.nom_complet }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5">
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <a href="/socis/{{ soci.pk }}/" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+      <h4 class="mb-0"><i class="bi bi-key text-brand-red"></i> Canviar contrasenya</h4>
+    </div>
+    <div class="card">
+      <div class="card-body p-4">
+        <p class="text-muted mb-3">
+          Soci: <strong>{{ soci.nom_complet }}</strong><br>
+          Usuari: <strong>{{ soci.usuari.email }}</strong>
+        </p>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nova contrasenya *</label>
+            <input type="password" name="nova_contrasenya" class="form-control" minlength="6" required autofocus>
+            <small class="text-muted">Mínim 6 caràcters.</small>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Confirmar contrasenya *</label>
+            <input type="password" name="confirmar_contrasenya" class="form-control" required>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-brand flex-grow-1">
+              <i class="bi bi-save"></i> Guardar nova contrasenya
+            </button>
+            <a href="/socis/{{ soci.pk }}/" class="btn btn-outline-secondary">Cancel·lar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

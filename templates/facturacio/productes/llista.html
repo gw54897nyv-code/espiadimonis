@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Productes — {{ conf.nom_colla }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2><i class="bi bi-box-seam text-brand-red"></i> Productes / Serveis</h2>
+  <a href="/facturacio/productes/nou/" class="btn btn-brand"><i class="bi bi-plus-lg"></i> Nou producte</a>
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead style="background:#111;color:#fff;">
+        <tr><th>Nom</th><th>Descripció</th><th class="text-end">Preu unit.</th><th class="text-end">IVA</th><th>Estat</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for p in productes %}
+        <tr>
+          <td class="fw-semibold">{{ p.nom }}</td>
+          <td class="text-muted small">{{ p.descripcio|default:'—' }}</td>
+          <td class="text-end">{{ p.preu_unitari }} €</td>
+          <td class="text-end">{{ p.iva }}%</td>
+          <td>{% if p.actiu %}<span class="badge bg-success">Actiu</span>{% else %}<span class="badge bg-secondary">Inactiu</span>{% endif %}</td>
+          <td class="text-end">
+            <a href="/facturacio/productes/{{ p.pk }}/editar/" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+            <a href="/facturacio/productes/{{ p.pk }}/eliminar/" class="btn btn-sm btn-outline-danger ms-1"><i class="bi bi-trash"></i></a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted py-4">Cap producte registrat.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

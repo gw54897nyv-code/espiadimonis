@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}{{ accio }} producte — {{ conf.nom_colla }}{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center gap-2 mb-4">
+  <a href="/facturacio/productes/" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+  <h3 class="mb-0">{{ accio }} producte / servei</h3>
+</div>
+<div class="card" style="max-width:500px">
+  <div class="card-body p-4">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-12"><label class="form-label fw-semibold">Nom *</label>{{ form.nom }}</div>
+        <div class="col-12"><label class="form-label fw-semibold">Descripció</label>{{ form.descripcio }}</div>
+        <div class="col-md-6"><label class="form-label fw-semibold">Preu unitari (€) *</label>{{ form.preu_unitari }}</div>
+        <div class="col-md-6"><label class="form-label fw-semibold">IVA (%)</label>{{ form.iva }}</div>
+        <div class="col-12">
+          <div class="form-check">{{ form.actiu }}<label class="form-check-label" for="{{ form.actiu.id_for_label }}">Producte actiu</label></div>
+        </div>
+      </div>
+      <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-brand"><i class="bi bi-save"></i> Desar</button>
+        <a href="/facturacio/productes/" class="btn btn-outline-secondary">Cancel·lar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

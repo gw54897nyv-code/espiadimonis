@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% block title %}Junta Directiva — {{ conf.nom_colla }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0"><i class="bi bi-diagram-3 text-brand-red"></i> Junta Directiva</h2>
+  {% if user.perfil.es_junta %}
+  <a href="{% url 'gestionar_junta' %}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-pencil-square"></i> Gestionar càrrecs
+  </a>
+  {% endif %}
+</div>
+
+{% if total == 0 %}
+<div class="text-center py-5 text-muted">
+  <i class="bi bi-diagram-3 display-1"></i>
+  <p class="mt-3">Encara no s'han definit els càrrecs de la junta directiva.</p>
+</div>
+{% else %}
+
+<style>
+  /* ── Org-tree ── */
+  .org-tree { overflow-x: auto; padding-bottom: 20px; }
+  .org-level { display: flex; justify-content: center; align-items: flex-start; gap: 24px; position: relative; }
+  .org-level + .org-level { margin-top: 0; }
+
+  /* Connector vertical entre nivells */
+  .org-connector-v {
+    display: flex; justify-content: center;
+    height: 32px;
+  }
+  .org-connector-v::before {
+    content: ''; display: block;
+    width: 2px; height: 100%;
+    background: #cc0000;
+  }
+
+  /* Connector horitzontal (branca) */
+  .org-branch {
+    display: flex; justify-content: center;
+    position: relative;
+    margin-bottom: 0;
+  }
+  .org-branch::before {
+    content: '';
+    position: absolute; top: 0; left: 50%; right: 50%;
+    height: 2px; background: #cc0000;
+    transition: left 0.2s, right 0.2s;
+  }
+  .org-level.multi .org-branch::before {
+    left: calc(50% / var(--n, 1));
+    right: calc(50% / var(--n, 1));
+  }
+
+  /* Node card */
+  .org-node {
+    display: flex; flex-direction: column; align-items: center;
+    min-width: 160px; max-width: 200px;
+    position: relative;
+  }
+  .org-node::before {
+    content: ''; display: block;
+    width: 2px; height: 32px;
+    background: #cc0000;
+  }
+  .org-node:first-child::before,
+  .org-node-root::before { display: none; }
+
+  .org-card {
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 16px 14px 12px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    width: 100%;
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+  .org-card:hover { box-shadow: 0 4px 16px rgba(204,0,0,.15); border-color: #cc0000; }
+
+  .org-card.nivell-1 { border-color: #cc0000; background: #fff5f5; }
+  .org-card.nivell-2 { border-color: #444; }
+  .org-card.nivell-3 { border-color: #bbb; }
+
+  .org-foto {
+    width: 64px; height: 64px; border-radius: 50%; object-fit: cover;
+    border: 3px solid #cc0000; margin-bottom: 8px;
+  }
+  .org-foto-placeholder {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: #2d2d2d; border: 3px solid #cc0000;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 8px;
+    font-size: 1.6rem; color: #fff;
+  }
+  .org-carrec {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: #cc0000; margin-bottom: 3px;
+  }
+  .org-nom { font-size: 0.92rem; font-weight: 600; color: #1a1a1a; line-height: 1.2; }
+  .org-tipus { font-size: 0.72rem; color: #777; margin-top: 2px; }
+  .org-funcions {
+    font-size: 0.72rem; color: #555; margin-top: 8px; text-align: left;
+    border-top: 1px solid #eee; padding-top: 6px; line-height: 1.4;
+    max-height: 70px; overflow-y: auto;
+  }
+
+  /* Línia horitzontal que connecta els nodes del mateix nivell */
+  .org-hline-wrap {
+    display: flex; align-items: flex-start;
+    position: relative;
+  }
+  .org-hline-wrap::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: calc(var(--first-offset, 50%) + 0px);
+    right: calc(var(--last-offset, 50%) + 0px);
+    height: 2px;
+    background: #cc0000;
+  }
+</style>
+
+<div class="org-tree">
+
+  <!-- ── Nivell 1: President ── -->
+  {% if nivell1 %}
+  <div class="org-level justify-content-center mb-0">
+    {% for c in nivell1 %}
+    <div class="org-node org-node-root">
+      <div class="org-card nivell-1">
+        {% if c.soci.foto %}
+          <img src="{{ c.soci.foto.url }}" class="org-foto" alt="{{ c.soci.nom_complet }}">
+        {% else %}
+          <div class="org-foto-placeholder"><i class="bi bi-person"></i></div>
+        {% endif %}
+        <div class="org-carrec">{{ c.get_carrec_display }}</div>
+        <div class="org-nom">{{ c.soci.nom_complet }}</div>
+        <div class="org-tipus">{{ c.soci.get_tipus_display }}</div>
+        {% if c.funcions %}
+        <div class="org-funcions">{{ c.funcions }}</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Connector vertical nivell 1→2 -->
+  {% if nivell1 and nivell2 %}
+  <div class="org-connector-v"></div>
+  {% endif %}
+
+  <!-- ── Nivell 2: Vicepresident / Secretari / Tresorer ── -->
+  {% if nivell2 %}
+  <div class="org-level">
+    {% for c in nivell2 %}
+    <div class="org-node">
+      <div class="org-card nivell-2">
+        {% if c.soci.foto %}
+          <img src="{{ c.soci.foto.url }}" class="org-foto" alt="{{ c.soci.nom_complet }}">
+        {% else %}
+          <div class="org-foto-placeholder"><i class="bi bi-person"></i></div>
+        {% endif %}
+        <div class="org-carrec">{{ c.get_carrec_display }}</div>
+        <div class="org-nom">{{ c.soci.nom_complet }}</div>
+        <div class="org-tipus">{{ c.soci.get_tipus_display }}</div>
+        {% if c.funcions %}
+        <div class="org-funcions">{{ c.funcions }}</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Connector vertical nivell 2→3 -->
+  {% if nivell2 and nivell3 %}
+  <div class="org-connector-v"></div>
+  {% elif nivell1 and nivell3 and not nivell2 %}
+  <div class="org-connector-v"></div>
+  {% endif %}
+
+  <!-- ── Nivell 3: Vocals / Altres ── -->
+  {% if nivell3 %}
+  <div class="org-level flex-wrap">
+    {% for c in nivell3 %}
+    <div class="org-node">
+      <div class="org-card nivell-3">
+        {% if c.soci.foto %}
+          <img src="{{ c.soci.foto.url }}" class="org-foto" alt="{{ c.soci.nom_complet }}">
+        {% else %}
+          <div class="org-foto-placeholder" style="background:#555;"><i class="bi bi-person"></i></div>
+        {% endif %}
+        <div class="org-carrec" style="color:#555;">{{ c.get_carrec_display }}</div>
+        <div class="org-nom">{{ c.soci.nom_complet }}</div>
+        <div class="org-tipus">{{ c.soci.get_tipus_display }}</div>
+        {% if c.funcions %}
+        <div class="org-funcions">{{ c.funcions }}</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Llegenda -->
+<div class="mt-4 d-flex gap-3 justify-content-center flex-wrap">
+  <span class="badge" style="background:#cc0000;font-size:.8rem;padding:6px 12px;">Presidència</span>
+  <span class="badge" style="background:#444;font-size:.8rem;padding:6px 12px;">Comissió executiva</span>
+  <span class="badge" style="background:#888;font-size:.8rem;padding:6px 12px;">Vocals</span>
+</div>
+
+{% endif %}
+{% endblock %}

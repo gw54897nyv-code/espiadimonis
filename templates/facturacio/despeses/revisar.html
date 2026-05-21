@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Revisar despesa — Espiadimonis{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center mb-4">
+  <a href="{% url 'llista_despeses' %}" class="btn btn-sm btn-outline-secondary me-3"><i class="bi bi-arrow-left"></i></a>
+  <h2 class="mb-0"><i class="bi bi-check2-circle text-warning"></i> Revisar despesa</h2>
+</div>
+
+<div class="row g-4" style="max-width:900px">
+  <!-- Dades de la despesa -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-light fw-semibold">Dades enviades pel soci</div>
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-5">Soci</dt>
+          <dd class="col-sm-7">{{ despesa.soci.get_full_name|default:despesa.soci.username|default:'—' }}</dd>
+
+          <dt class="col-sm-5">Data</dt>
+          <dd class="col-sm-7">{{ despesa.data|date:"d/m/Y" }}</dd>
+
+          <dt class="col-sm-5">Descripció</dt>
+          <dd class="col-sm-7">{{ despesa.descripcio }}</dd>
+
+          <dt class="col-sm-5">Proveïdor</dt>
+          <dd class="col-sm-7">{{ despesa.proveidor|default:'—' }}</dd>
+
+          <dt class="col-sm-5">Import</dt>
+          <dd class="col-sm-7 fw-bold text-danger">{{ despesa.import_total|floatformat:2 }} €</dd>
+
+          <dt class="col-sm-5">Pagament</dt>
+          <dd class="col-sm-7">
+            {% if despesa.amb_targeta_colla %}
+            <span class="badge bg-primary"><i class="bi bi-credit-card-fill"></i> Targeta de la colla</span>
+            {% else %}
+            <span class="badge bg-secondary"><i class="bi bi-person-fill"></i> Pagament personal</span>
+            {% endif %}
+          </dd>
+
+          {% if despesa.ticket %}
+          <dt class="col-sm-5">Ticket</dt>
+          <dd class="col-sm-7">
+            <a href="{{ despesa.ticket.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-paperclip"></i> Veure ticket
+            </a>
+          </dd>
+          {% endif %}
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulari de revisió -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-warning bg-opacity-25 fw-semibold">Classificació (junta directiva)</div>
+      <div class="card-body p-4">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Categoria *</label>
+            {{ form.categoria }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Partida *</label>
+            {{ form.partida }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Estat</label>
+            {{ form.estat }}
+          </div>
+          {% if form.errors %}
+          <div class="alert alert-danger">
+            <ul class="mb-0">{% for f,e in form.errors.items %}{% for err in e %}<li>{{ f }}: {{ err }}</li>{% endfor %}{% endfor %}</ul>
+          </div>
+          {% endif %}
+          <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn btn-warning"><i class="bi bi-check2-circle"></i> Guardar revisió</button>
+            <a href="{% url 'llista_despeses' %}" class="btn btn-outline-secondary">Cancel·lar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

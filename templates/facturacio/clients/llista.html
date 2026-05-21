@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Clients — {{ conf.nom_colla }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2><i class="bi bi-building text-brand-red"></i> Clients</h2>
+  <a href="/facturacio/clients/nou/" class="btn btn-brand"><i class="bi bi-plus-lg"></i> Nou client</a>
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead style="background:#111;color:#fff;">
+        <tr><th>Nom</th><th>NIF</th><th>Email</th><th>Telèfon</th><th>Factures</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for c in clients %}
+        <tr>
+          <td class="fw-semibold">{{ c.nom }}</td>
+          <td>{{ c.nif|default:'—' }}</td>
+          <td>{{ c.email|default:'—' }}</td>
+          <td>{{ c.telefon|default:'—' }}</td>
+          <td><span class="badge bg-secondary">{{ c.factures.count }}</span></td>
+          <td class="text-end">
+            <a href="/facturacio/clients/{{ c.pk }}/editar/" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+            <a href="/facturacio/clients/{{ c.pk }}/eliminar/" class="btn btn-sm btn-outline-danger ms-1"><i class="bi bi-trash"></i></a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted py-4">Cap client registrat.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

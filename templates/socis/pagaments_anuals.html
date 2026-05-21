@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Pagaments anuals{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2><i class="bi bi-calendar-check text-warning"></i> Pagaments anuals</h2>
+  <form method="get" class="d-flex align-items-center gap-2">
+    <label class="form-label mb-0 fw-semibold">Any:</label>
+    <input type="number" name="any" value="{{ any_sel }}" class="form-control form-control-sm" style="width:90px">
+    <button type="submit" class="btn btn-sm btn-outline-secondary">Anar</button>
+  </form>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-bordered table-sm align-middle mb-0">
+      <thead class="table-dark text-center">
+        <tr>
+          <th class="text-start">Soci</th>
+          {% for num, nom in mesos %}
+          <th style="font-size:0.75rem">{{ nom|slice:":3" }}</th>
+          {% endfor %}
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in dades %}
+        <tr>
+          <td>
+            <a href="/socis/{{ item.soci.pk }}/" class="text-decoration-none text-dark">
+              {{ item.soci.nom_complet }}
+            </a>
+          </td>
+          {% for num, nom in mesos %}
+          {% with pag=item.pagaments|dictsort:"mes" %}
+          <td class="text-center">
+            {% with p=item.pagaments|default_if_none:'' %}
+              {% for pk, pobj in item.pagaments.items %}
+                {% if pobj.mes == num %}
+                  <form method="post" action="/socis/pagament/{{ pobj.pk }}/toggle/" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm p-0 border-0 bg-transparent">
+                      {% if pobj.pagat %}
+                        <i class="bi bi-check-circle-fill text-success"></i>
+                      {% else %}
+                        <i class="bi bi-x-circle text-danger"></i>
+                      {% endif %}
+                    </button>
+                  </form>
+                {% endif %}
+              {% endfor %}
+            {% endwith %}
+          </td>
+          {% endwith %}
+          {% endfor %}
+          <td class="text-center fw-semibold">
+            {% for pk, pobj in item.pagaments.items %}
+              {% if pobj.pagat %}{% endif %}
+            {% endfor %}
+            —
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="14" class="text-center text-muted py-3">Sense socis actius.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

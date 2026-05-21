@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5">
+    <div class="card border-danger">
+      <div class="card-header bg-danger text-white">Eliminar producte</div>
+      <div class="card-body text-center p-4">
+        <p>Vols eliminar el producte <strong>{{ producte.nom }}</strong>?</p>
+        <div class="d-flex justify-content-center gap-3">
+          <form method="post">{% csrf_token %}<button class="btn btn-danger">Sí, eliminar</button></form>
+          <a href="/facturacio/productes/" class="btn btn-outline-secondary">Cancel·lar</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

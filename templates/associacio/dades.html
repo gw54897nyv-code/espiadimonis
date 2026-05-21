@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% block title %}L'associació — {{ conf.nom_colla }}{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0"><i class="bi bi-building text-brand-red"></i> L'associació</h2>
+</div>
+
+<div class="row g-4">
+
+  <!-- Columna esquerra: identitat + contacte -->
+  <div class="col-md-5">
+
+    <!-- Identitat -->
+    <div class="card mb-4">
+      <div class="card-body text-center py-4">
+        {% if conf.logo %}
+        <img src="{{ conf.logo.url }}" alt="{{ conf.nom_colla }}"
+             style="max-height:100px;max-width:220px;object-fit:contain;" class="mb-3 d-block mx-auto">
+        {% else %}
+        <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle bg-dark"
+             style="width:80px;height:80px;">
+          <i class="bi bi-fire" style="font-size:2.2rem;color:#cc0000;"></i>
+        </div>
+        {% endif %}
+        <h3 class="fw-bold mb-2">{{ conf.nom_colla }}</h3>
+        <dl class="row text-start small mb-0 mx-2">
+          <dt class="col-4 text-muted">CIF / NIF</dt>
+          <dd class="col-8 fw-semibold">{{ conf.cif|default:"—" }}</dd>
+          <dt class="col-4 text-muted">Adreça</dt>
+          <dd class="col-8">{{ conf.adreca|default:"—" }}</dd>
+        </dl>
+      </div>
+    </div>
+
+    <!-- Contacte -->
+    <div class="card mb-4">
+      <div class="card-header"><i class="bi bi-telephone"></i> Contacte</div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item d-flex align-items-center gap-2">
+          <i class="bi bi-envelope-fill text-brand-red"></i>
+          {% if conf.email_contacte %}
+          <a href="mailto:{{ conf.email_contacte }}" class="text-decoration-none">{{ conf.email_contacte }}</a>
+          {% else %}<span class="text-muted">—</span>{% endif %}
+        </li>
+        <li class="list-group-item d-flex align-items-center gap-2">
+          <i class="bi bi-telephone-fill text-brand-red"></i>
+          {% if conf.telefon_contacte %}
+          <a href="tel:{{ conf.telefon_contacte }}" class="text-decoration-none">{{ conf.telefon_contacte }}</a>
+          {% else %}<span class="text-muted">—</span>{% endif %}
+        </li>
+      </ul>
+    </div>
+
+    <!-- Dades bancàries -->
+    <div class="card">
+      <div class="card-header"><i class="bi bi-bank"></i> Dades bancàries</div>
+      <div class="card-body">
+        {% if conf.iban %}
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <span class="fw-bold font-monospace fs-6">{{ conf.iban }}</span>
+          <button class="btn btn-sm btn-outline-secondary ms-auto"
+                  onclick="navigator.clipboard.writeText('{{ conf.iban }}');this.innerHTML='<i class=\'bi bi-check-lg\'></i> Copiat';">
+            <i class="bi bi-clipboard"></i> Copiar
+          </button>
+        </div>
+        <p class="text-muted small mt-2 mb-0">
+          <i class="bi bi-info-circle"></i> Fes servir aquest compte per a transferències i pagaments de quotes.
+        </p>
+        {% else %}
+        <span class="text-muted">—</span>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Columna dreta: junta + (junta) formulari edició -->
+  <div class="col-md-7">
+
+    <!-- Junta directiva -->
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-diagram-3"></i> Junta Directiva</span>
+        {% if user.perfil.es_junta %}
+        <a href="{% url 'junta_organigrama' %}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-diagram-3"></i> Organigrama complet
+        </a>
+        {% endif %}
+      </div>
+      {% if carrecs_junta %}
+      <ul class="list-group list-group-flush">
+        {% for c in carrecs_junta %}
+        <li class="list-group-item d-flex align-items-center gap-3 py-2">
+          {% if c.soci.foto %}
+          <img src="{{ c.soci.foto.url }}" class="rounded-circle flex-shrink-0"
+               style="width:38px;height:38px;object-fit:cover;border:2px solid #cc0000;">
+          {% else %}
+          <div class="rounded-circle bg-dark d-flex align-items-center justify-content-center flex-shrink-0"
+               style="width:38px;height:38px;border:2px solid #cc0000;">
+            <i class="bi bi-person text-white"></i>
+          </div>
+          {% endif %}
+          <div class="flex-grow-1">
+            <div class="fw-semibold">{{ c.soci.nom_complet }}</div>
+            {% if c.funcions %}
+            <div class="text-muted small">{{ c.funcions }}</div>
+            {% endif %}
+          </div>
+          <span class="badge {% if c.carrec == 'PRESIDENT' %}bg-danger{% elif c.carrec in 'VICEPRESIDENT,SECRETARI,TRESORER' %}bg-dark{% else %}bg-secondary{% endif %}">
+            {{ c.get_carrec_display }}
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="card-body text-muted small">
+        Cap membre de la junta definit.
+        {% if user.perfil.es_junta %}
+        <a href="{% url 'gestionar_junta' %}">Afegir càrrecs.</a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Formulari d'edició (només junta) -->
+    {% if form %}
+    <div class="card">
+      <div class="card-header" style="background:#111;color:#fff;">
+        <i class="bi bi-pencil-square"></i> Editar dades de l'associació
+      </div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label fw-semibold small">Nom de la colla</label>
+              {{ form.nom_colla }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold small">CIF / NIF</label>
+              {{ form.cif }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Adreça</label>
+              {{ form.adreca }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Email de contacte</label>
+              {{ form.email_contacte }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Telèfon de contacte</label>
+              {{ form.telefon_contacte }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold small">IBAN</label>
+              {{ form.iban }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Logo</label>
+              {{ form.logo }}
+              {% if conf.logo %}
+              <div class="mt-1"><img src="{{ conf.logo.url }}" style="height:40px;"> <small class="text-muted">logo actual</small></div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="mt-3">
+            <button type="submit" class="btn btn-brand">
+              <i class="bi bi-save"></i> Desar canvis
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,257 @@
+:root {
+  --brand-red: #cc0000;
+  --brand-red-dark: #990000;
+  --brand-black: #111111;
+  --brand-black-soft: #1e1e1e;
+  --brand-grey: #2a2a2a;
+}
+
+/* ---- Utilitats de color ---- */
+.text-brand-red  { color: var(--brand-red) !important; }
+.bg-brand-black  { background-color: var(--brand-black) !important; }
+.bg-brand-red    { background-color: var(--brand-red) !important; }
+
+/* ---- Body ---- */
+body {
+  background: #f4f4f4;
+  color: #1a1a1a;
+}
+
+/* ---- Navbar ---- */
+.navbar.bg-brand-black {
+  border-bottom: 3px solid var(--brand-red);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.navbar-dark .navbar-nav .nav-link {
+  color: rgba(255,255,255,0.85);
+  font-size: 0.9rem;
+}
+.navbar-dark .navbar-nav .nav-link:hover {
+  color: #fff;
+}
+.navbar-brand {
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  color: #fff !important;
+}
+.dropdown-menu-dark {
+  background-color: var(--brand-black-soft);
+}
+
+/* ---- Botó principal ---- */
+.btn-brand {
+  background-color: var(--brand-red);
+  border-color: var(--brand-red);
+  color: #fff;
+  font-weight: 600;
+}
+.btn-brand:hover, .btn-brand:focus {
+  background-color: var(--brand-red-dark);
+  border-color: var(--brand-red-dark);
+  color: #fff;
+}
+.btn-outline-brand {
+  border-color: var(--brand-red);
+  color: var(--brand-red);
+}
+.btn-outline-brand:hover {
+  background-color: var(--brand-red);
+  color: #fff;
+}
+
+/* ---- Cards ---- */
+.card {
+  border-radius: 0.75rem;
+  border: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.card-header {
+  border-radius: 0.75rem 0.75rem 0 0 !important;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  background: #fff;
+  border-bottom: 2px solid #f0f0f0;
+}
+.card-header.bg-brand {
+  background: var(--brand-black) !important;
+  color: #fff;
+  border-bottom: 2px solid var(--brand-red);
+}
+
+/* ---- Taules ---- */
+.table th {
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.table-dark {
+  background-color: var(--brand-black) !important;
+}
+.table-dark th {
+  background-color: var(--brand-black);
+  border-color: var(--brand-grey);
+}
+
+/* ---- Badges ---- */
+.badge-dimonis {
+  background: var(--brand-red);
+  color: #fff;
+}
+.badge-batucada {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+/* ---- Alertes ---- */
+.alert-success { --bs-alert-color: #065f46; --bs-alert-bg: #d1fae5; --bs-alert-border-color: #a7f3d0; }
+.alert-danger   { --bs-alert-color: #991b1b; --bs-alert-bg: #fee2e2; --bs-alert-border-color: #fecaca; }
+.alert-warning  { --bs-alert-color: #92400e; --bs-alert-bg: #fef3c7; --bs-alert-border-color: #fde68a; }
+.alert-error    { --bs-alert-color: #991b1b; --bs-alert-bg: #fee2e2; --bs-alert-border-color: #fecaca; }
+
+/* ---- Dashboard cards ---- */
+.stat-card {
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card .stat-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 3rem;
+  opacity: 0.18;
+}
+.stat-card.red   { background: var(--brand-red); }
+.stat-card.black { background: var(--brand-black); }
+.stat-card.dark  { background: #333; }
+.stat-card.grey  { background: #555; }
+
+/* ---- Carnet de soci ---- */
+.carnet {
+  width: 340px;
+  background: var(--brand-black);
+  color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  position: relative;
+}
+.carnet-header {
+  background: var(--brand-red);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.carnet-header h3 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0;
+}
+.carnet-body {
+  padding: 16px;
+  display: flex;
+  gap: 14px;
+}
+.carnet-foto {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid var(--brand-red);
+  flex-shrink: 0;
+}
+.carnet-foto-placeholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  background: var(--brand-grey);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid var(--brand-red);
+}
+.carnet-info .num {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--brand-red);
+  line-height: 1;
+}
+.carnet-info .nom {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-top: 4px;
+}
+.carnet-info .tipus {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #aaa;
+  margin-top: 2px;
+}
+.carnet-info .dni {
+  font-size: 0.8rem;
+  color: #ccc;
+  margin-top: 6px;
+}
+.carnet-footer {
+  background: var(--brand-grey);
+  padding: 8px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+  color: #aaa;
+}
+.carnet-checks {
+  padding: 0 16px 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.carnet-check {
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.carnet-check.ok  { background: #065f46; color: #6ee7b7; }
+.carnet-check.ko  { background: #7f1d1d; color: #fca5a5; }
+
+/* ---- Indicadors de documentació ---- */
+.doc-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+}
+.doc-indicator.ok { background: #d1fae5; color: #065f46; }
+.doc-indicator.ko { background: #fee2e2; color: #991b1b; }
+
+/* ---- Seccions de menors ---- */
+#seccio-menor {
+  border: 2px dashed var(--brand-red);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: #fff5f5;
+}
+
+/* ---- Sticky ---- */
+.sticky-top { top: 72px; }
+
+@media print {
+  .navbar, .btn, form, .no-print { display: none !important; }
+  body { background: #fff; }
+}

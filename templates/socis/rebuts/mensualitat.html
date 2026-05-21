@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Rebut {{ pagament.get_mes_display }} {{ pagament.any }} — {{ soci.nom_complet }}{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <a href="/socis/{{ soci.pk }}/" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Tornar
+  </a>
+  <div class="d-flex gap-2">
+    <button onclick="window.print()" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-printer"></i> Imprimir
+    </button>
+    <form method="post" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" name="enviar_email" class="btn btn-sm btn-brand" {% if not soci.email %}disabled{% endif %}>
+        <i class="bi bi-envelope"></i> Enviar per email
+      </button>
+    </form>
+  </div>
+</div>
+
+{% if enviat %}
+<div class="alert alert-success"><i class="bi bi-check-circle"></i> Rebut enviat a {{ soci.email }}</div>
+{% endif %}
+
+<div class="card mx-auto" style="max-width:680px;">
+  <div class="card-body p-4">
+
+    <!-- Capçalera -->
+    <div class="d-flex justify-content-between align-items-start mb-4">
+      <div>
+        <h4 class="fw-bold mb-0" style="color:#cc0000;">{{ conf.nom_colla }}</h4>
+        {% if conf.email_contacte %}<div class="text-muted small">{{ conf.email_contacte }}</div>{% endif %}
+        {% if conf.telefon_contacte %}<div class="text-muted small">{{ conf.telefon_contacte }}</div>{% endif %}
+      </div>
+      {% if conf.logo %}
+      <img src="{{ conf.logo.url }}" alt="Logo" style="max-height:70px;">
+      {% endif %}
+    </div>
+
+    <hr>
+    <h5 class="text-center mb-4">
+      <i class="bi bi-file-earmark-text"></i> REBUT — MENSUALITAT BATUCADA<br>
+      <small class="text-muted">{{ pagament.get_mes_display|upper }} {{ pagament.any }}</small>
+    </h5>
+
+    <!-- Dades soci -->
+    <div class="row mb-4">
+      <div class="col-6">
+        <div class="text-muted small mb-1">SOCI</div>
+        <div class="fw-semibold">{{ soci.nom_complet }}</div>
+        <div class="small text-muted">Núm. {{ soci.numero_soci }}</div>
+        {% if soci.dni %}<div class="small text-muted">DNI: {{ soci.dni }}</div>{% endif %}
+        {% if soci.email %}<div class="small text-muted">{{ soci.email }}</div>{% endif %}
+      </div>
+      <div class="col-6 text-end">
+        <div class="text-muted small mb-1">DATA DE PAGAMENT</div>
+        <div class="fw-semibold">{{ pagament.data_pagament|date:"d/m/Y"|default:'—' }}</div>
+        <div class="text-muted small">{{ pagament.get_mes_display }} {{ pagament.any }}</div>
+      </div>
+    </div>
+
+    <!-- Concepte -->
+    <table class="table table-bordered mb-4">
+      <thead class="table-dark">
+        <tr>
+          <th>Concepte</th>
+          <th class="text-end" style="width:120px">Import</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Mensualitat Batucada — {{ pagament.get_mes_display }} {{ pagament.any }}</td>
+          <td class="text-end fw-semibold">{{ pagament.import_pagat|default:conf.mensualitat_batucada }} €</td>
+        </tr>
+      </tbody>
+      <tfoot class="table-light fw-bold">
+        <tr>
+          <td class="text-end">TOTAL</td>
+          <td class="text-end" style="color:#cc0000;">{{ pagament.import_pagat|default:conf.mensualitat_batucada }} €</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <!-- Estat -->
+    <div class="text-center mb-3">
+      {% if pagament.pagat %}
+      <span class="badge bg-success fs-6 px-4 py-2"><i class="bi bi-check-circle-fill"></i> PAGAT</span>
+      {% else %}
+      <span class="badge bg-warning text-dark fs-6 px-4 py-2"><i class="bi bi-clock"></i> PENDENT</span>
+      {% endif %}
+    </div>
+
+    <hr>
+    <p class="text-center text-muted small mb-0">
+      {{ conf.nom_colla }} · Rebut generat el {% now "d/m/Y" %}
+    </p>
+  </div>
+</div>
+{% endblock %}

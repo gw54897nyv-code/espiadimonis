@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% block title %}Factures — {{ conf.nom_colla }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0"><i class="bi bi-receipt text-brand-red"></i> Factures</h2>
+  <div class="d-flex gap-2">
+    <a href="{% url 'dashboard_facturacio' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-bar-chart-line"></i> Dashboard
+    </a>
+    <a href="{% url 'crear_factura' %}" class="btn btn-brand btn-sm">
+      <i class="bi bi-plus-lg"></i> Nova factura
+    </a>
+  </div>
+</div>
+
+<!-- Filtres -->
+<div class="card mb-3">
+  <div class="card-body py-2">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-auto">
+        <select name="tipus" class="form-select form-select-sm">
+          <option value="">Tots els tipus</option>
+          <option value="FACTURA"     {% if filtre_tipus == 'FACTURA' %}selected{% endif %}>Factures</option>
+          <option value="PRESSUPOST"  {% if filtre_tipus == 'PRESSUPOST' %}selected{% endif %}>Pressupostos</option>
+        </select>
+      </div>
+      <div class="col-auto">
+        <select name="estat" class="form-select form-select-sm">
+          <option value="">Tots els estats</option>
+          <option value="PENDENT"  {% if filtre_estat == 'PENDENT' %}selected{% endif %}>Pendent</option>
+          <option value="PAGAT"    {% if filtre_estat == 'PAGAT' %}selected{% endif %}>Pagat</option>
+          <option value="CANCELAT" {% if filtre_estat == 'CANCELAT' %}selected{% endif %}>Cancel·lat</option>
+        </select>
+      </div>
+      <div class="col-auto">
+        <select name="partida" class="form-select form-select-sm">
+          <option value="">Totes les partides</option>
+          <option value="COLLA"    {% if filtre_partida == 'COLLA' %}selected{% endif %}>Colla</option>
+          <option value="DIMONIS"  {% if filtre_partida == 'DIMONIS' %}selected{% endif %}>Dimonis</option>
+          <option value="BATUCADA" {% if filtre_partida == 'BATUCADA' %}selected{% endif %}>Batucada</option>
+        </select>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-funnel"></i> Filtrar
+        </button>
+        <a href="{% url 'llista_factures' %}" class="btn btn-sm btn-link text-muted">Netejar</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Taula -->
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Número</th>
+          <th>Tipus</th>
+          <th>Client</th>
+          <th>Data</th>
+          <th>Partida</th>
+          <th>Total</th>
+          <th>Estat</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in factures %}
+        <tr>
+          <td>
+            <a href="{% url 'detall_factura' f.pk %}" class="fw-semibold text-decoration-none">
+              {{ f.numero }}
+            </a>
+          </td>
+          <td>
+            <span class="badge {% if f.tipus == 'FACTURA' %}bg-primary{% else %}bg-secondary{% endif %}">
+              {{ f.get_tipus_display }}
+            </span>
+          </td>
+          <td>{{ f.client }}</td>
+          <td>{{ f.data|date:"d/m/Y" }}</td>
+          <td>
+            {% if f.partida == 'COLLA' %}
+              <span class="badge" style="background:#8e44ad;">Colla</span>
+            {% elif f.partida == 'DIMONIS' %}
+              <span class="badge bg-danger">Dimonis</span>
+            {% elif f.partida == 'BATUCADA' %}
+              <span class="badge bg-dark">Batucada</span>
+            {% else %}
+              <span class="text-muted small">—</span>
+            {% endif %}
+          </td>
+          <td class="fw-semibold">{{ f.total|floatformat:2 }} €</td>
+          <td>
+            <!-- Selector d'estat inline -->
+            <form method="post" action="{% url 'canvi_estat_factura' f.pk %}" class="d-inline">
+              {% csrf_token %}
+              <select name="estat" class="form-select form-select-sm estat-select
+                {% if f.estat == 'PAGAT' %}border-success text-success
+                {% elif f.estat == 'PENDENT' %}border-warning text-warning
+                {% else %}border-secondary text-secondary{% endif %}"
+                style="width:auto;min-width:115px;font-weight:600;"
+                onchange="this.form.submit()">
+                <option value="PENDENT"  {% if f.estat == 'PENDENT' %}selected{% endif %}>⏳ Pendent</option>
+                <option value="PAGAT"    {% if f.estat == 'PAGAT' %}selected{% endif %}>✅ Pagat</option>
+                <option value="CANCELAT" {% if f.estat == 'CANCELAT' %}selected{% endif %}>❌ Cancel·lat</option>
+              </select>
+            </form>
+          </td>
+          <td class="text-end">
+            <a href="{% url 'pdf_factura' f.pk %}" class="btn btn-sm btn-outline-danger" title="PDF" target="_blank">
+              <i class="bi bi-file-pdf"></i>
+            </a>
+            <a href="{% url 'editar_factura' f.pk %}" class="btn btn-sm btn-outline-secondary ms-1">
+              <i class="bi bi-pencil"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="text-center text-muted py-4">
+            <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+            Sense factures.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

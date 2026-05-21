@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Eliminar factura{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card border-danger shadow-sm">
+      <div class="card-header bg-danger text-white fw-semibold">
+        <i class="bi bi-exclamation-triangle"></i> Confirmar eliminació
+      </div>
+      <div class="card-body text-center p-4">
+        <p class="fs-5">Vols eliminar la factura <strong>{{ factura.numero }}</strong>?</p>
+        <p class="text-muted">Client: {{ factura.client }} · Total: {{ factura.total|floatformat:2 }} €</p>
+        <div class="d-flex justify-content-center gap-3 mt-3">
+          <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Sí, eliminar</button>
+          </form>
+          <a href="/facturacio/{{ factura.pk }}/" class="btn btn-outline-secondary">Cancel·lar</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

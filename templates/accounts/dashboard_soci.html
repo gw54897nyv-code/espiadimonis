@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block title %}La meva fitxa — Espiadimonis{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0"><i class="bi bi-person-circle text-warning"></i> La meva fitxa</h2>
+  <a href="{% url 'registrar_despesa' %}" class="btn btn-brand">
+    <i class="bi bi-plus-lg"></i> Nova despesa
+  </a>
+</div>
+
+{% if soci %}
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm text-center p-3">
+      {% if soci.foto %}
+        <img src="{{ soci.foto.url }}" class="rounded-circle mx-auto mb-3" style="width:120px;height:120px;object-fit:cover;">
+      {% else %}
+        <div class="mx-auto mb-3 rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width:120px;height:120px;">
+          <i class="bi bi-person display-4 text-white"></i>
+        </div>
+      {% endif %}
+      <h4 class="fw-bold">{{ soci.nom_complet }}</h4>
+      <span class="badge bg-{% if soci.tipus == 'DIMONIS' %}warning text-dark{% else %}info{% endif %} mb-2">
+        {{ soci.get_tipus_display }}
+      </span>
+      <p class="text-muted small mb-1"><i class="bi bi-envelope"></i> {{ soci.email }}</p>
+      {% if soci.telefon %}
+      <p class="text-muted small mb-1"><i class="bi bi-telephone"></i> {{ soci.telefon }}</p>
+      {% endif %}
+      <p class="text-muted small"><i class="bi bi-calendar"></i> Alta: {{ soci.data_alta|date:"d/m/Y" }}</p>
+    </div>
+    <div class="card mt-3">
+      <div class="card-body text-center">
+        <a href="{% url 'registrar_despesa' %}" class="btn btn-outline-secondary w-100 mb-2">
+          <i class="bi bi-plus-circle"></i> Registrar despesa
+        </a>
+        <a href="{% url 'les_meves_despeses' %}" class="btn btn-outline-secondary w-100">
+          <i class="bi bi-receipt"></i> Les meves despeses
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-journal-text"></i> Actes recents</span>
+        <a href="{% url 'actes_public' %}" class="btn btn-sm btn-outline-secondary">Veure tots</a>
+      </div>
+      {% if ultims_actes %}
+      <ul class="list-group list-group-flush">
+        {% for acta in ultims_actes %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-dark">{{ acta.get_tipus_display }}</span>
+            <span class="small">{{ acta.titol }}</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <small class="text-muted">{{ acta.data|date:"d/m/Y" }}</small>
+            {% if acta.fitxer %}
+            <a href="{{ acta.fitxer.url }}" target="_blank" class="btn btn-sm btn-outline-secondary py-0">
+              <i class="bi bi-file-earmark-pdf"></i>
+            </a>
+            {% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="card-body text-muted small">Encara no hi ha actes publicats.</div>
+      {% endif %}
+    </div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-receipt"></i> Darreres despeses
+      </div>
+      <div class="card-body">
+        {% if despeses %}
+        <div class="list-group list-group-flush">
+          {% for d in despeses %}
+          <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+            <div>
+              <div class="fw-semibold small">{{ d.descripcio }}</div>
+              <div class="text-muted" style="font-size:.75rem">{{ d.data|date:"d/m/Y" }}</div>
+            </div>
+            <div class="text-end">
+              <div class="fw-semibold">{{ d.import_total|floatformat:2 }} €</div>
+              <span class="badge {% if d.estat == 'PENDENT' %}bg-warning text-dark{% else %}bg-success{% endif %}" style="font-size:.65rem;">
+                {{ d.get_estat_display }}
+              </span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="mt-2">
+          <a href="{% url 'les_meves_despeses' %}" class="btn btn-sm btn-outline-secondary">
+            Veure totes <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+        {% else %}
+        <p class="text-muted small mb-0">Cap despesa registrada.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-warning">
+  El teu compte d'usuari no està associat a cap fitxa de soci.
+  Contacta amb la junta directiva.
+</div>
+{% endif %}
+{% endblock %}

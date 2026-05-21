@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}Despeses — Espiadimonis{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>
+    <i class="bi bi-cart-dash text-warning"></i> Despeses
+    {% if pendents %}
+    <span class="badge bg-danger ms-2">{{ pendents }} pendent{{ pendents|pluralize:"s" }}</span>
+    {% endif %}
+  </h2>
+  <a href="{% url 'crear_despesa' %}" class="btn btn-danger"><i class="bi bi-plus-lg"></i> Nova despesa</a>
+</div>
+
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-body py-2">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-auto">
+        <label class="form-label mb-0 small fw-semibold">Any</label>
+        <input type="number" name="any" value="{{ any_sel }}" class="form-control form-control-sm" style="width:90px">
+      </div>
+      <div class="col-auto">
+        <label class="form-label mb-0 small fw-semibold">Partida</label>
+        <select name="partida" class="form-select form-select-sm">
+          <option value="">Totes</option>
+          {% for val, label in partides %}
+          <option value="{{ val }}" {% if filtre_partida == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-auto">
+        <label class="form-label mb-0 small fw-semibold">Estat</label>
+        <select name="estat" class="form-select form-select-sm">
+          <option value="">Tots</option>
+          {% for val, label in estats %}
+          <option value="{{ val }}" {% if filtre_estat == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Filtrar</button>
+      </div>
+      <div class="col text-end">
+        <span class="fw-semibold">Total: <span class="text-danger">{{ total|floatformat:2 }} €</span></span>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Data</th>
+          <th>Soci</th>
+          <th>Descripció</th>
+          <th>Categoria</th>
+          <th>Partida</th>
+          <th>Targeta</th>
+          <th class="text-end">Import</th>
+          <th>Estat</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in despeses %}
+        <tr {% if d.estat == 'PENDENT' %}class="table-warning"{% endif %}>
+          <td>{{ d.data|date:"d/m/Y" }}</td>
+          <td>{{ d.soci.get_full_name|default:d.soci.username|default:'—' }}</td>
+          <td>{{ d.descripcio }}</td>
+          <td>
+            {% if d.categoria %}
+            <span class="badge bg-secondary">{{ d.get_categoria_display }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            {% if d.partida %}
+            <span class="badge
+              {% if d.partida == 'COLLA' %}bg-primary
+              {% elif d.partida == 'DIMONIS' %}bg-danger
+              {% else %}bg-success{% endif %}">
+              {{ d.get_partida_display }}
+            </span>
+            {% else %}—{% endif %}
+          </td>
+          <td class="text-center">
+            {% if d.amb_targeta_colla %}
+            <i class="bi bi-credit-card-fill text-primary" title="Targeta de la colla"></i>
+            {% else %}
+            <i class="bi bi-person-fill text-muted" title="Pagament personal"></i>
+            {% endif %}
+          </td>
+          <td class="text-end fw-semibold text-danger">{{ d.import_total|floatformat:2 }} €</td>
+          <td>
+            {% if d.estat == 'PENDENT' %}
+            <span class="badge bg-warning text-dark">Pendent</span>
+            {% else %}
+            <span class="badge bg-success">Revisat</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            {% if d.ticket %}
+            <a href="{{ d.ticket.url }}" target="_blank" class="btn btn-sm btn-outline-secondary me-1" title="Ticket">
+              <i class="bi bi-paperclip"></i>
+            </a>
+            {% endif %}
+            {% if d.estat == 'PENDENT' %}
+            <a href="{% url 'revisar_despesa' d.pk %}" class="btn btn-sm btn-warning me-1" title="Revisar">
+              <i class="bi bi-check2-circle"></i>
+            </a>
+            {% endif %}
+            <a href="{% url 'editar_despesa' d.pk %}" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <a href="{% url 'eliminar_despesa' d.pk %}" class="btn btn-sm btn-outline-danger ms-1">
+              <i class="bi bi-trash"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="text-center text-muted py-4">Sense despeses per als filtres seleccionats.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

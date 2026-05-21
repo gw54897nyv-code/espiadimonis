@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Registrar despesa — Espiadimonis{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center mb-4">
+  <a href="{% url 'les_meves_despeses' %}" class="btn btn-sm btn-outline-secondary me-3"><i class="bi bi-arrow-left"></i></a>
+  <h2 class="mb-0"><i class="bi bi-receipt text-warning"></i> Registrar despesa</h2>
+</div>
+
+<div class="alert alert-info border-0 shadow-sm mb-4" style="max-width:600px">
+  <i class="bi bi-info-circle me-2"></i>
+  Omple el formulari i puja el ticket. La junta directiva assignarà la categoria i la partida.
+</div>
+
+<div class="card border-0 shadow-sm" style="max-width:600px">
+  <div class="card-body p-4">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Data *</label>
+          {{ form.data }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Import (€) *</label>
+          {{ form.import_total }}
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-semibold">Descripció *</label>
+          {{ form.descripcio }}
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-semibold">Proveïdor / botiga</label>
+          {{ form.proveidor }}
+        </div>
+        <div class="col-12">
+          <div class="form-check form-switch">
+            {{ form.amb_targeta_colla }}
+            <label class="form-check-label" for="{{ form.amb_targeta_colla.id_for_label }}">
+              <i class="bi bi-credit-card-fill text-primary"></i>
+              He pagat amb la <strong>targeta de la colla</strong>
+            </label>
+          </div>
+          <div class="form-text">Deixa-ho desmarcat si has pagat de la teva butxaca.</div>
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-semibold">Ticket / factura <span class="text-muted fw-normal">(recomanat)</span></label>
+          {{ form.ticket }}
+          <div class="form-text">Foto o PDF del tiquet de compra.</div>
+        </div>
+      </div>
+      {% if form.errors %}
+      <div class="alert alert-danger mt-3">
+        <ul class="mb-0">{% for f,e in form.errors.items %}{% for err in e %}<li>{{ f }}: {{ err }}</li>{% endfor %}{% endfor %}</ul>
+      </div>
+      {% endif %}
+      <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-danger"><i class="bi bi-send"></i> Enviar despesa</button>
+        <a href="{% url 'les_meves_despeses' %}" class="btn btn-outline-secondary">Cancel·lar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

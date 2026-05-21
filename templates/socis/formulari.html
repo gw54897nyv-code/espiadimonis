@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% block title %}{{ accio }} soci — {{ conf.nom_colla }}{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center mb-4">
+  {% if soci %}
+  <a href="/socis/{{ soci.pk }}/" class="btn btn-sm btn-outline-secondary me-3"><i class="bi bi-arrow-left"></i></a>
+  {% else %}
+  <a href="/socis/" class="btn btn-sm btn-outline-secondary me-3"><i class="bi bi-arrow-left"></i></a>
+  {% endif %}
+  <h2 class="mb-0"><i class="bi bi-person-plus text-brand-red"></i> {{ accio }} soci</h2>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="row g-3">
+
+    <!-- Columna principal -->
+    <div class="col-lg-8">
+
+      <!-- Dades personals -->
+      <div class="card mb-3">
+        <div class="card-header">Dades personals</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Núm. soci</label>
+              {{ form.numero_soci }}
+              <div class="form-text">S'assigna automàticament</div>
+            </div>
+            <div class="col-md-5">
+              <label class="form-label fw-semibold">Nom *</label>
+              {{ form.nom }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Tipus</label>
+              {{ form.tipus }}
+            </div>
+            <div class="col-md-8">
+              <label class="form-label fw-semibold">Cognoms *</label>
+              {{ form.cognoms }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Data de naixement</label>
+              {{ form.data_naixement }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Email *</label>
+              {{ form.email }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Telèfon</label>
+              {{ form.telefon }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">DNI / NIE</label>
+              {{ form.dni }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Caducitat DNI</label>
+              {{ form.data_caducitat_dni }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Foto</label>
+              {{ form.foto }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Adreça -->
+      <div class="card mb-3">
+        <div class="card-header">Adreça</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Adreça</label>
+              {{ form.adreca }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Codi postal</label>
+              {{ form.codi_postal }}
+            </div>
+            <div class="col-md-8">
+              <label class="form-label fw-semibold">Municipi</label>
+              {{ form.ciutat }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dates i compte -->
+      <div class="card mb-3">
+        <div class="card-header">Alta i baixa</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Data d'alta</label>
+              {{ form.data_alta }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Data de baixa</label>
+              {{ form.data_baixa }}
+              <div class="form-text">Deixa buit si és actiu.</div>
+            </div>
+            {% if soci and soci.usuari %}
+            <div class="col-12">
+              <div class="alert alert-light border d-flex align-items-center gap-2 py-2 mb-0">
+                <i class="bi bi-person-check text-success fs-5"></i>
+                <span class="small">Compte d'accés: <strong>{{ soci.usuari.email }}</strong>
+                  — Rol: {% if soci.usuari.perfil.es_junta %}Junta Directiva{% else %}Soci{% endif %}</span>
+              </div>
+            </div>
+            {% elif not soci %}
+            <div class="col-12">
+              <div class="alert alert-info border d-flex align-items-center gap-2 py-2 mb-0">
+                <i class="bi bi-info-circle fs-5"></i>
+                <span class="small">Es crearà automàticament un compte d'accés amb l'email introduït.</span>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Junta directiva -->
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-diagram-3"></i> Junta Directiva</span>
+          <div class="form-check form-switch mb-0">
+            {{ form.es_junta }}
+            <label class="form-check-label fw-semibold" for="{{ form.es_junta.id_for_label }}">
+              Membre de la Junta
+            </label>
+          </div>
+        </div>
+        <div id="seccio-junta" class="card-body {% if not form.initial.es_junta and not form.es_junta.value %}d-none{% endif %}">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.carrec_junta.label }} *</label>
+              {{ form.carrec_junta }}
+              {% if form.carrec_junta.errors %}
+              <div class="text-danger small">{{ form.carrec_junta.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">{{ form.ordre_junta.label }}</label>
+              {{ form.ordre_junta }}
+              <div class="form-text">1=President, 2-4=Executiva, 10+=Vocals</div>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">{{ form.data_inici_carrec.label }}</label>
+              {{ form.data_inici_carrec }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">{{ form.funcions_junta.label }}</label>
+              {{ form.funcions_junta }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documentació -->
+      <div class="card mb-3">
+        <div class="card-header">Documentació i certificacions</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="form-check form-switch mb-1">
+                {{ form.te_curs_pirotecnia }}
+                <label class="form-check-label fw-semibold" for="{{ form.te_curs_pirotecnia.id_for_label }}">
+                  <i class="bi bi-fire text-brand-red"></i> Curs pirotècnia (CREE)
+                </label>
+              </div>
+              {{ form.data_curs_pirotecnia }}
+              <small class="text-muted">Data de la certificació</small>
+            </div>
+            <div class="col-md-6">
+              <div class="form-check form-switch mb-1">
+                {{ form.proteccio_dades_firmada }}
+                <label class="form-check-label fw-semibold" for="{{ form.proteccio_dades_firmada.id_for_label }}">
+                  <i class="bi bi-shield-check text-success"></i> Protecció de dades firmada
+                </label>
+              </div>
+              {{ form.data_proteccio_dades }}
+              <small class="text-muted">Data de la firma</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Menor d'edat (col·lapsable) -->
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-person-exclamation"></i> Menor d'edat</span>
+          <div class="form-check form-switch mb-0">
+            {{ form.es_menor }}
+            <label class="form-check-label" for="{{ form.es_menor.id_for_label }}">
+              És menor d'edat
+            </label>
+          </div>
+        </div>
+        <div id="seccio-menor" class="card-body {% if not form.instance.es_menor %}d-none{% endif %}">
+          <p class="text-muted small mb-3">
+            <i class="bi bi-info-circle"></i>
+            Els menors han d'estar associats a un tutor legal (soci major d'edat)
+            i han de tenir el permís del pare/mare signat.
+          </p>
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label fw-semibold">Tutor legal *</label>
+              {{ form.tutor_legal }}
+            </div>
+            <div class="col-md-4 d-flex align-items-end pb-2">
+              <div class="form-check form-switch">
+                {{ form.permis_pare_signat }}
+                <label class="form-check-label fw-semibold" for="{{ form.permis_pare_signat.id_for_label }}">
+                  Permís pare/mare signat
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Columna lateral -->
+    <div class="col-lg-4">
+      <div class="card sticky-top">
+        <div class="card-header bg-brand"><span class="text-white">Estat del soci</span></div>
+        <div class="card-body">
+          <div class="form-check form-switch mb-3">
+            {{ form.actiu }}
+            <label class="form-check-label fw-semibold" for="{{ form.actiu.id_for_label }}">Soci actiu</label>
+          </div>
+          {% if form.errors %}
+          <div class="alert alert-danger mt-2">
+            <ul class="mb-0 small">
+              {% for field, errors in form.errors.items %}
+                {% for error in errors %}<li>{{ field }}: {{ error }}</li>{% endfor %}
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+        <div class="card-footer bg-white d-flex gap-2">
+          <button type="submit" class="btn btn-brand flex-grow-1">
+            <i class="bi bi-save"></i> Desar
+          </button>
+          {% if soci %}
+          <a href="/socis/{{ soci.pk }}/" class="btn btn-outline-secondary">Cancel·lar</a>
+          {% else %}
+          <a href="/socis/" class="btn btn-outline-secondary">Cancel·lar</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Menor d'edat
+  var checkMenor = document.getElementById('{{ form.es_menor.id_for_label }}');
+  var seccioMenor = document.getElementById('seccio-menor');
+  if (checkMenor && seccioMenor) {
+    checkMenor.addEventListener('change', function () {
+      seccioMenor.classList.toggle('d-none', !this.checked);
+    });
+  }
+
+  // Junta directiva
+  var checkJunta = document.getElementById('{{ form.es_junta.id_for_label }}');
+  var seccioJunta = document.getElementById('seccio-junta');
+  if (checkJunta && seccioJunta) {
+    checkJunta.addEventListener('change', function () {
+      seccioJunta.classList.toggle('d-none', !this.checked);
+    });
+  }
+});
+</script>
+{% endblock %}

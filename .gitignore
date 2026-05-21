@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Entorn virtual
+.venv/
+venv/
+env/
+
+# Django
+db.sqlite3
+*.sqlite3
+staticfiles/
+media/*
+!media/.gitkeep
+
+# Variables d'entorn (mai pujar al repo)
+.env
+*.env
+
+# macOS
+.DS_Store
+
+# IDE i eines locals
+.vscode/
+.idea/
+.claude/
+
+# Logs
+*.log

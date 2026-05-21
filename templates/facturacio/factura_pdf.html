@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: #1a1a1a; }
+    .page { padding: 40px 50px; max-width: 800px; margin: 0 auto; }
+
+    /* Títol */
+    .titol { text-align: center; font-size: 14px; font-weight: 700; letter-spacing: 0.15em; margin-bottom: 30px; }
+
+    /* Capçalera: empresa + logo */
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
+    .empresa { font-size: 11px; line-height: 1.7; }
+    .empresa strong { font-size: 12px; font-weight: 700; }
+    .logo-block { text-align: right; }
+    .logo-block img { max-height: 70px; max-width: 140px; object-fit: contain; }
+
+    /* Bloc FACTURAT A + nº factura */
+    .factura-info { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+    .facturat-a h4 { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+    .facturat-a p { line-height: 1.6; }
+    .num-data { text-align: right; font-size: 11px; line-height: 2; }
+    .num-data strong { font-size: 12px; }
+
+    /* Concepte */
+    .concepte-bloc { background: #e8e8e8; padding: 6px 12px; font-weight: 700; font-size: 11px;
+                     text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0; }
+
+    /* Taula línies */
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    thead th { background: #2d2d2d; color: white; padding: 7px 12px; font-size: 10px;
+               text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700; }
+    thead th:last-child { text-align: right; }
+    tbody td { padding: 8px 12px; border-bottom: 1px solid #e0e0e0; font-size: 11px; }
+    tbody td:last-child { text-align: right; }
+    tbody tr:last-child td { border-bottom: none; }
+
+    /* Totals */
+    .totals { display: flex; justify-content: flex-end; margin-bottom: 24px; }
+    .totals-taula { width: 280px; border-collapse: collapse; }
+    .totals-taula td { padding: 5px 12px; font-size: 11px; border-bottom: 1px solid #e0e0e0; }
+    .totals-taula td:last-child { text-align: right; font-weight: 600; }
+    .totals-taula tr.total-final td { background: #2d2d2d; color: white; font-weight: 700;
+                                      font-size: 13px; border: none; padding: 8px 12px; }
+
+    /* Nota IVA */
+    .nota-iva { font-size: 10px; color: #555; margin-bottom: 20px; font-style: italic; }
+
+    /* Pagament */
+    .pagament { margin-top: 20px; font-size: 11px; line-height: 1.8; }
+    .pagament strong { font-weight: 700; }
+
+    /* Peu */
+    .peu { margin-top: 40px; padding-top: 12px; border-top: 1px solid #ccc;
+           font-size: 9.5px; color: #777; text-align: center; line-height: 1.5; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Títol -->
+  <div class="titol">FACTURA</div>
+
+  <!-- Empresa + Logo -->
+  <div class="header">
+    <div class="empresa">
+      <strong>{{ conf.nom_colla|upper }}</strong><br>
+      {% if conf.cif %}CIF: {{ conf.cif }}<br>{% endif %}
+      {% if conf.adreca %}{{ conf.adreca }}<br>{% endif %}
+      {% if conf.telefon_contacte %}Tel: {{ conf.telefon_contacte }}{% endif %}
+      {% if conf.email_contacte %} | {{ conf.email_contacte }}{% endif %}
+    </div>
+    <div class="logo-block">
+      {% if conf.logo %}
+      <img src="{{ conf.logo.url }}" alt="{{ conf.nom_colla }}">
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Facturat a + número/data -->
+  <div class="factura-info">
+    <div class="facturat-a">
+      <h4>Facturat a</h4>
+      <p>
+        <strong>{{ factura.client }}</strong><br>
+        {% if factura.adreca_client %}{{ factura.adreca_client }}<br>{% endif %}
+        {% if factura.nif_client %}CIF: {{ factura.nif_client }}{% endif %}
+      </p>
+    </div>
+    <div class="num-data">
+      <strong>FACTURA NÚM:</strong>&nbsp;&nbsp;{{ factura.numero }}<br>
+      <strong>DATA FACTURA:</strong>&nbsp;&nbsp;{{ factura.data|date:"d/m/Y" }}
+    </div>
+  </div>
+
+  <!-- Concepte -->
+  {% if factura.concepte %}
+  <div class="concepte-bloc">CONCEPTE</div>
+  <div style="padding: 8px 12px 16px; font-size:11px; border-bottom: 1px solid #e0e0e0; margin-bottom: 0;">
+    {{ factura.concepte }}
+  </div>
+  {% endif %}
+
+  <!-- Taula línies -->
+  <table>
+    <thead>
+      <tr>
+        <th>Descripció</th>
+        <th style="text-align:right">Import</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for linia in factura.linies.all %}
+      <tr>
+        <td>{{ linia.descripcio }}</td>
+        <td style="text-align:right">{{ linia.import_linia|floatformat:2 }} €</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Totals -->
+  <div class="totals">
+    <table class="totals-taula">
+      {% if not factura.exempt_iva %}
+      <tr>
+        <td>Subtotal</td>
+        <td>{{ factura.subtotal|floatformat:2 }} €</td>
+      </tr>
+      <tr>
+        <td>IVA ({{ factura.iva }}%)</td>
+        <td>{{ factura.import_iva|floatformat:2 }} €</td>
+      </tr>
+      {% endif %}
+      <tr class="total-final">
+        <td>TOTAL:</td>
+        <td>{{ factura.total|floatformat:2 }} €</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Nota IVA exempt -->
+  {% if factura.exempt_iva %}
+  <p class="nota-iva">
+    Exempt d'IVA d'acord amb l'article 20, apartat Un, número 14è de la Llei 37/1992, de 28 de desembre, de l'IVA.
+  </p>
+  {% endif %}
+
+  <!-- Notes internes (opcional) -->
+  {% if factura.notes %}
+  <p style="font-size:10px;color:#555;margin-bottom:16px;">{{ factura.notes }}</p>
+  {% endif %}
+
+  <!-- Forma de pagament + IBAN -->
+  <div class="pagament">
+    <strong>FORMA DE PAGAMENT:</strong> {{ factura.get_forma_pagament_display|upper }}<br>
+    {% if conf.iban and factura.forma_pagament == 'TRANSFERENCIA' %}
+    <strong>IBAN:</strong> {{ conf.iban }}
+    {% endif %}
+  </div>
+
+  <!-- Peu de pàgina -->
+  <div class="peu">
+    {{ conf.nom_colla }} és una associació sense ànim de lucre inscrita al Registre d'Associacions de les Illes Balears.
+  </div>
+
+</div>
+</body>
+</html>

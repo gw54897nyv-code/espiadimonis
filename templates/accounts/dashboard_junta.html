@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — Espiadimonis{% endblock %}
+{% block content %}
+<div class="row mb-4">
+  <div class="col">
+    <h2><i class="bi bi-speedometer2 text-warning"></i> Dashboard — Junta Directiva</h2>
+    <p class="text-muted">Any {{ any_actual }} · Mes {{ mes_actual }}</p>
+  </div>
+</div>
+
+<!-- Targetes resum -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card border-0 bg-primary text-white h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <p class="card-text small mb-1">Total socis actius</p>
+            <h2 class="fw-bold mb-0">{{ total_socis }}</h2>
+          </div>
+          <i class="bi bi-people display-4 opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 bg-success text-white h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <p class="card-text small mb-1">Al dia (mes actual)</p>
+            <h2 class="fw-bold mb-0">{{ socis_al_dia }}</h2>
+          </div>
+          <i class="bi bi-check-circle display-4 opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 bg-warning text-dark h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <p class="card-text small mb-1">Pendents de pagar</p>
+            <h2 class="fw-bold mb-0">{{ socis_pendents }}</h2>
+          </div>
+          <i class="bi bi-exclamation-circle display-4 opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 bg-danger text-white h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <p class="card-text small mb-1">Factures pendents</p>
+            <h2 class="fw-bold mb-0">{{ factures_pendents }}</h2>
+          </div>
+          <i class="bi bi-receipt display-4 opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Balanç econòmic -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body text-center">
+        <p class="text-muted mb-1">Ingressos {{ any_actual }}</p>
+        <h3 class="text-success fw-bold">{{ ingressos_any|floatformat:2 }} €</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body text-center">
+        <p class="text-muted mb-1">Despeses {{ any_actual }}</p>
+        <h3 class="text-danger fw-bold">{{ despeses_any|floatformat:2 }} €</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body text-center">
+        <p class="text-muted mb-1">Balanç {{ any_actual }}</p>
+        <h3 class="fw-bold {% if balanc >= 0 %}text-success{% else %}text-danger{% endif %}">
+          {{ balanc|floatformat:2 }} €
+        </h3>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Actes recents -->
+<div class="row g-3 mb-4">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-journal-text"></i> Actes recents</span>
+        <a href="{% url 'actes_public' %}" class="btn btn-sm btn-outline-secondary">Veure tots</a>
+      </div>
+      {% if ultims_actes %}
+      <ul class="list-group list-group-flush">
+        {% for acta in ultims_actes %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-dark">{{ acta.get_tipus_display }}</span>
+            <span>{{ acta.titol }}</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <small class="text-muted">{{ acta.data|date:"d/m/Y" }}</small>
+            {% if acta.fitxer %}
+            <a href="{{ acta.fitxer.url }}" target="_blank" class="btn btn-sm btn-outline-secondary py-0">
+              <i class="bi bi-file-earmark-pdf"></i>
+            </a>
+            {% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="card-body text-muted small">Encara no hi ha actes publicats.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Accions ràpides + llistes -->
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-people"></i> Darrers socis registrats
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for soci in ultims_socis %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <a href="/socis/{{ soci.pk }}/" class="text-decoration-none text-dark">
+            {{ soci.nom_complet }}
+          </a>
+          <span class="badge bg-{% if soci.tipus == 'DIMONIS' %}warning text-dark{% else %}info{% endif %}">
+            {{ soci.get_tipus_display }}
+          </span>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">Encara no hi ha socis.</li>
+        {% endfor %}
+      </ul>
+      <div class="card-footer bg-white">
+        <a href="/socis/" class="btn btn-sm btn-outline-primary">Veure tots</a>
+        <a href="/socis/nou/" class="btn btn-sm btn-primary ms-2">+ Nou soci</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-cart-dash"></i> Darreres despeses
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for d in ultimes_despeses %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <small class="text-muted">{{ d.data|date:"d/m/Y" }}</small>
+            <span class="ms-2">{{ d.descripcio }}</span>
+          </div>
+          <span class="fw-semibold text-danger">{{ d.import_total }} €</span>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">Encara no hi ha despeses.</li>
+        {% endfor %}
+      </ul>
+      <div class="card-footer bg-white">
+        <a href="/facturacio/despeses/" class="btn btn-sm btn-outline-danger">Veure totes</a>
+        <a href="/facturacio/despeses/nova/" class="btn btn-sm btn-danger ms-2">+ Nova despesa</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

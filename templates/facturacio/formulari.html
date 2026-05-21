@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}{{ accio }} factura — {{ conf.nom_colla }}{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center mb-4">
+  <a href="/facturacio/" class="btn btn-sm btn-outline-secondary me-3"><i class="bi bi-arrow-left"></i></a>
+  <h2 class="mb-0"><i class="bi bi-receipt text-brand-red"></i> {{ accio }} factura</h2>
+</div>
+
+<!-- Dades JSON per JS -->
+<script id="productes-data" type="application/json">{{ productes_json|safe }}</script>
+<script id="clients-data" type="application/json">{{ clients_json|safe }}</script>
+
+<form method="post">
+  {% csrf_token %}
+  <div class="row g-3">
+    <div class="col-lg-8">
+
+      <!-- Client -->
+      <div class="card mb-3">
+        <div class="card-header">Client</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Client registrat</label>
+              {{ form.client_registrat }}
+              <small class="text-muted">Selecciona un client per omplir els camps automàticament.</small>
+            </div>
+            <div class="col-md-8">
+              <label class="form-label fw-semibold">Nom client *</label>
+              {{ form.client }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">NIF / CIF</label>
+              {{ form.nif_client }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Adreça</label>
+              {{ form.adreca_client }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Capçalera factura -->
+      <div class="card mb-3">
+        <div class="card-header">Dades de la factura</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4"><label class="form-label fw-semibold">Número *</label>{{ form.numero }}</div>
+            <div class="col-md-4"><label class="form-label fw-semibold">Tipus</label>{{ form.tipus }}</div>
+            <div class="col-md-4"><label class="form-label fw-semibold">Data *</label>{{ form.data }}</div>
+            <div class="col-12"><label class="form-label fw-semibold">Concepte / referència</label>{{ form.concepte }}</div>
+            <div class="col-md-3"><label class="form-label fw-semibold">IVA (%)</label>{{ form.iva }}</div>
+            <div class="col-md-3 d-flex align-items-end pb-2">
+              <div class="form-check">
+                {{ form.exempt_iva }}
+                <label class="form-check-label small" for="{{ form.exempt_iva.id_for_label }}">Exempt IVA (art. 20)</label>
+              </div>
+            </div>
+            <div class="col-md-3"><label class="form-label fw-semibold">Forma de pagament</label>{{ form.forma_pagament }}</div>
+            <div class="col-md-3"><label class="form-label fw-semibold">Partida</label>{{ form.partida }}</div>
+            <div class="col-md-3"><label class="form-label fw-semibold">Estat</label>{{ form.estat }}</div>
+            <div class="col-12"><label class="form-label fw-semibold">Notes internes</label>{{ form.notes }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Línies -->
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span>Línies</span>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="afegir-linia">
+            <i class="bi bi-plus-lg"></i> Afegir línia
+          </button>
+        </div>
+        <div class="card-body pb-0">
+          {{ formset.management_form }}
+          <div class="row g-1 mb-1 text-muted" style="font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;">
+            <div class="col-md-3">Producte</div>
+            <div class="col-md-4">Descripció</div>
+            <div class="col-md-2">Quantitat</div>
+            <div class="col-md-2">Preu (€)</div>
+            <div class="col-md-1"></div>
+          </div>
+          <div id="linies-container">
+            {% for lform in formset %}
+            <div class="linia-factura row g-1 align-items-center mb-2">
+              {{ lform.id }}
+              <div class="col-md-3">{{ lform.producte }}</div>
+              <div class="col-md-4">{{ lform.descripcio }}</div>
+              <div class="col-md-2">{{ lform.quantitat }}</div>
+              <div class="col-md-2">{{ lform.preu_unitari }}</div>
+              <div class="col-md-1 text-end small fw-semibold import-linia">—</div>
+              {% if lform.DELETE %}
+              <div class="col-12 d-flex align-items-center gap-1 pb-1" style="border-bottom:1px solid #f0f0f0;">
+                <div class="form-check mb-0">{{ lform.DELETE }}
+                  <label class="form-check-label text-danger small" for="{{ lform.DELETE.id_for_label }}"><i class="bi bi-trash"></i> Eliminar</label>
+                </div>
+              </div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Resum lateral -->
+    <div class="col-lg-4">
+      <div class="card sticky-top">
+        <div class="card-header" style="background:#111;color:#fff;border-bottom:2px solid #cc0000;">Resum</div>
+        <div class="card-body">
+          <dl class="mb-0">
+            <dt>Subtotal</dt><dd id="resum-subtotal">0,00 €</dd>
+            <dt>IVA</dt><dd id="resum-iva">0,00 €</dd>
+            <dt class="fs-5">Total</dt><dd id="resum-total" class="fs-5 fw-bold text-brand-red">0,00 €</dd>
+          </dl>
+        </div>
+        <div class="card-footer bg-white d-flex gap-2">
+          <button type="submit" class="btn btn-brand flex-grow-1"><i class="bi bi-save"></i> Desar</button>
+          <a href="/facturacio/" class="btn btn-outline-secondary">Cancel·lar</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}
+{% block extra_js %}
+<script src="/static/js/factura.js"></script>
+{% endblock %}

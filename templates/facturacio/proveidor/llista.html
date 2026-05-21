@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% block title %}Factures de proveïdors — {{ conf.nom_colla }}{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0"><i class="bi bi-truck text-brand-red"></i> Factures de proveïdors</h2>
+  <a href="{% url 'crear_factura_proveidor' %}" class="btn btn-brand">
+    <i class="bi bi-plus-lg"></i> Nova factura proveïdor
+  </a>
+</div>
+
+<!-- Resum -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card text-center">
+      <div class="card-body py-3">
+        <div class="fs-4 fw-bold">{{ total|floatformat:2 }} €</div>
+        <div class="text-muted small">Total {{ any_sel }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-center border-warning">
+      <div class="card-body py-3">
+        <div class="fs-4 fw-bold text-warning">{{ pendents }}</div>
+        <div class="text-muted small">Pendents de pagar</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filtres -->
+<div class="card mb-3">
+  <div class="card-body py-2">
+    <form method="get" class="row g-2 align-items-end">
+      <input type="hidden" name="any" value="{{ any_sel }}">
+      <div class="col-auto">
+        <select name="estat" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="">Tots els estats</option>
+          {% for v, l in estats %}
+          <option value="{{ v }}" {% if filtre_estat == v %}selected{% endif %}>{{ l }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-auto">
+        <select name="partida" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="">Totes les partides</option>
+          {% for v, l in partides %}
+          <option value="{{ v }}" {% if filtre_partida == v %}selected{% endif %}>{{ l }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% if filtre_estat or filtre_partida %}
+      <div class="col-auto">
+        <a href="?any={{ any_sel }}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-x"></i> Netejar
+        </a>
+      </div>
+      {% endif %}
+    </form>
+  </div>
+</div>
+
+<!-- Taula -->
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-dark">
+        <tr>
+          <th>Proveïdor</th>
+          <th>Núm.</th>
+          <th>Data</th>
+          <th>Venciment</th>
+          <th>Concepte</th>
+          <th>Partida</th>
+          <th class="text-end">Import</th>
+          <th>Estat</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in factures %}
+        <tr class="{% if f.estat == 'PENDENT' %}table-warning{% endif %}">
+          <td class="fw-semibold">{{ f.proveidor }}</td>
+          <td class="text-muted small">{{ f.numero|default:"—" }}</td>
+          <td>{{ f.data|date:"d/m/Y" }}</td>
+          <td>
+            {% if f.data_venciment %}
+              <span class="{% if f.estat == 'PENDENT' and f.data_venciment < today %}text-danger fw-semibold{% endif %}">
+                {{ f.data_venciment|date:"d/m/Y" }}
+              </span>
+            {% else %}—{% endif %}
+          </td>
+          <td>{{ f.descripcio }}</td>
+          <td>
+            {% if f.partida %}
+            <span class="badge bg-secondary">{{ f.partida }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td class="text-end fw-semibold">{{ f.import_total|floatformat:2 }} €</td>
+          <td>
+            <form method="post" action="{% url 'canvi_estat_factura_proveidor' f.pk %}" class="d-inline">
+              {% csrf_token %}
+              <select name="estat" class="form-select form-select-sm"
+                      onchange="this.form.submit()" style="min-width:130px;">
+                {% for v, l in estats %}
+                <option value="{{ v }}" {% if f.estat == v %}selected{% endif %}>{{ l }}</option>
+                {% endfor %}
+              </select>
+            </form>
+          </td>
+          <td class="text-end">
+            <a href="{% url 'editar_factura_proveidor' f.pk %}" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-pencil"></i>
+            </a>
+            {% if f.fitxer %}
+            <a href="{{ f.fitxer.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-file-earmark"></i>
+            </a>
+            {% endif %}
+            <a href="{% url 'eliminar_factura_proveidor' f.pk %}" class="btn btn-sm btn-outline-danger">
+              <i class="bi bi-trash"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="text-center text-muted py-4">Cap factura de proveïdor.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

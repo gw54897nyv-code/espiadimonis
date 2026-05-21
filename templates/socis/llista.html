@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Socis — Espiadimonis{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2><i class="bi bi-people text-warning"></i> Socis</h2>
+  <div class="d-flex gap-2">
+    <a href="/socis/importar/" class="btn btn-outline-secondary btn-sm"><i class="bi bi-upload"></i> Importar CSV</a>
+    <a href="/socis/nou/" class="btn btn-brand"><i class="bi bi-person-plus"></i> Nou soci</a>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-body py-2">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-auto">
+        <select name="tipus" class="form-select form-select-sm">
+          <option value="">Tots els tipus</option>
+          <option value="DIMONIS" {% if filtre_tipus == 'DIMONIS' %}selected{% endif %}>Dimonis</option>
+          <option value="BATUCADA" {% if filtre_tipus == 'BATUCADA' %}selected{% endif %}>Batucada</option>
+        </select>
+      </div>
+      <div class="col-auto">
+        <select name="actiu" class="form-select form-select-sm">
+          <option value="true" {% if filtre_actiu == 'true' %}selected{% endif %}>Actius</option>
+          <option value="false" {% if filtre_actiu == 'false' %}selected{% endif %}>Baixa</option>
+          <option value="" {% if filtre_actiu == '' %}selected{% endif %}>Tots</option>
+        </select>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Filtrar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Nom</th>
+          <th>Tipus</th>
+          <th>Email</th>
+          <th>Telèfon</th>
+          <th>Alta</th>
+          <th>Estat</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for soci in socis %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              {% if soci.foto %}
+                <img src="{{ soci.foto.url }}" class="rounded-circle" style="width:36px;height:36px;object-fit:cover;">
+              {% else %}
+                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width:36px;height:36px;">
+                  <i class="bi bi-person text-white small"></i>
+                </div>
+              {% endif %}
+              <a href="/socis/{{ soci.pk }}/" class="text-decoration-none fw-semibold text-dark">
+                {{ soci.nom_complet }}
+              </a>
+            </div>
+          </td>
+          <td>
+            <span class="badge bg-{% if soci.tipus == 'DIMONIS' %}warning text-dark{% else %}info{% endif %}">
+              {{ soci.get_tipus_display }}
+            </span>
+          </td>
+          <td><small>{{ soci.email }}</small></td>
+          <td><small>{{ soci.telefon|default:'-' }}</small></td>
+          <td><small>{{ soci.data_alta|date:"d/m/Y" }}</small></td>
+          <td>
+            {% if soci.actiu %}
+              <span class="badge bg-success">Actiu</span>
+            {% else %}
+              <span class="badge bg-secondary">Baixa</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            <a href="/socis/{{ soci.pk }}/editar/" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-pencil"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center text-muted py-4">No hi ha socis amb els filtres seleccionats.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

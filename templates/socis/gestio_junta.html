@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block title %}Gestió Junta Directiva — {{ conf.nom_colla }}{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="{% url 'junta_organigrama' %}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i>
+  </a>
+  <h2 class="mb-0"><i class="bi bi-diagram-3 text-brand-red"></i> Gestió de la Junta</h2>
+</div>
+
+<div class="row g-4">
+
+  <!-- Llista de càrrecs actuals -->
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-list-check"></i> Càrrecs actuals</span>
+        <span class="badge bg-secondary">{{ carrecs|length }}</span>
+      </div>
+      {% if carrecs %}
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th>Soci</th>
+              <th>Càrrec</th>
+              <th>Ordre</th>
+              <th>Inici</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in carrecs %}
+            <tr>
+              <td>
+                {% if c.soci.foto %}
+                <img src="{{ c.soci.foto.url }}" class="rounded-circle me-1"
+                     style="width:28px;height:28px;object-fit:cover;">
+                {% endif %}
+                {{ c.soci.nom_complet }}
+              </td>
+              <td>
+                <span class="badge {% if c.carrec == 'PRESIDENT' %}bg-danger{% elif c.carrec in 'VICEPRESIDENT,SECRETARI,TRESORER' %}bg-dark{% else %}bg-secondary{% endif %}">
+                  {{ c.get_carrec_display }}
+                </span>
+              </td>
+              <td>{{ c.ordre }}</td>
+              <td>{{ c.data_inici|date:"d/m/Y"|default:'—' }}</td>
+              <td class="text-end">
+                <a href="?editar={{ c.pk }}" class="btn btn-sm btn-outline-secondary">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <form method="post" class="d-inline"
+                      onsubmit="return confirm('Eliminar el càrrec de {{ c.get_carrec_display }}?')">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="delete">
+                  <input type="hidden" name="pk" value="{{ c.pk }}">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% if c.funcions %}
+            <tr class="table-light">
+              <td colspan="5" class="py-1 px-4 small text-muted">
+                <i class="bi bi-info-circle"></i> {{ c.funcions }}
+              </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="card-body text-muted">Sense càrrecs definits.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Formulari add / edit -->
+  <div class="col-lg-5">
+
+    {% if edit_obj %}
+    <!-- Editar -->
+    <div class="card border-warning">
+      <div class="card-header" style="background:#111;color:#fff;">
+        <i class="bi bi-pencil-square"></i> Editar: {{ edit_obj.get_carrec_display }}
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="edit">
+          <input type="hidden" name="pk" value="{{ edit_obj.pk }}">
+          {% for field in edit_form %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <div class="text-danger small">{{ field.errors }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-brand flex-grow-1">
+              <i class="bi bi-save"></i> Desar canvis
+            </button>
+            <a href="{% url 'gestionar_junta' %}" class="btn btn-outline-secondary">Cancel·lar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {% else %}
+    <!-- Afegir nou càrrec -->
+    <div class="card">
+      <div class="card-header" style="background:#111;color:#fff;">
+        <i class="bi bi-person-plus"></i> Afegir càrrec
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add">
+          {% for field in form %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <div class="text-danger small">{{ field.errors }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+          <button type="submit" class="btn btn-brand w-100">
+            <i class="bi bi-plus-lg"></i> Afegir a la Junta
+          </button>
+        </form>
+        <div class="mt-3 small text-muted">
+          <i class="bi bi-info-circle"></i>
+          <strong>Consell d'ordre:</strong> usa valors baixos (1, 2, 3…) per controlar la posició a l'arbre.
+          President = 1, VP/Sec/Tres = 2–4, Vocals = 10+.
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

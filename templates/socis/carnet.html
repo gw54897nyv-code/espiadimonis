@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carnet #{{ soci.numero_soci }} — {{ soci.nom_complet }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/static/css/estils.css" rel="stylesheet">
+  <style>
+    body { background: #f0f0f0; }
+    @media print {
+      body { background: #fff; }
+      .no-print { display: none !important; }
+      .carnet { box-shadow: none; }
+    }
+  </style>
+</head>
+<body class="min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+
+  <!-- Botons d'acció -->
+  <div class="d-flex gap-2 mb-4 no-print">
+    <a href="/socis/{{ soci.pk }}/" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left"></i> Tornar
+    </a>
+    <button onclick="window.print()" class="btn btn-brand btn-sm">
+      <i class="bi bi-printer"></i> Imprimir / Desar PDF
+    </button>
+  </div>
+
+  <!-- Carnet frontal -->
+  <div class="carnet mb-4">
+    <div class="carnet-header">
+      {% if conf.logo %}
+      <img src="{{ conf.logo.url }}" alt="Logo" style="height:28px;width:auto;">
+      {% else %}
+      <i class="bi bi-fire text-white fs-5"></i>
+      {% endif %}
+      <div>
+        <h3 class="text-white">{{ conf.nom_colla }}</h3>
+        <div style="font-size:0.65rem;color:rgba(255,255,255,0.7);letter-spacing:0.1em;text-transform:uppercase;">
+          Carnet de Soci {{ any_actual }}
+        </div>
+      </div>
+    </div>
+
+    <div class="carnet-body">
+      {% if soci.foto %}
+        <img src="{{ soci.foto.url }}" class="carnet-foto" alt="Foto">
+      {% else %}
+        <div class="carnet-foto-placeholder">
+          <i class="bi bi-person text-white fs-2"></i>
+        </div>
+      {% endif %}
+      <div class="carnet-info">
+        <div class="num">#{{ soci.numero_soci }}</div>
+        <div class="nom">{{ soci.nom_complet }}</div>
+        <div class="tipus">{{ soci.get_tipus_display }}
+          {% if soci.es_menor %} · <span style="color:#fbbf24;">Menor</span>{% endif %}
+        </div>
+        {% if soci.dni %}
+        <div class="dni">{{ soci.dni }}</div>
+        {% endif %}
+        {% if soci.data_naixement %}
+        <div style="font-size:0.72rem;color:#bbb;margin-top:3px;">
+          Naix. {{ soci.data_naixement|date:"d/m/Y" }}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Checks de documentació -->
+    <div class="carnet-checks">
+      <span class="carnet-check {% if soci.te_curs_pirotecnia %}ok{% else %}ko{% endif %}">
+        <i class="bi bi-fire"></i> CREE
+      </span>
+      <span class="carnet-check {% if soci.proteccio_dades_firmada %}ok{% else %}ko{% endif %}">
+        <i class="bi bi-shield-check"></i> LOPD
+      </span>
+      {% if soci.es_menor %}
+      <span class="carnet-check {% if soci.permis_pare_signat %}ok{% else %}ko{% endif %}">
+        <i class="bi bi-people"></i> Permís
+      </span>
+      {% endif %}
+      <span class="carnet-check {% if mesos_pagats >= 1 %}ok{% else %}ko{% endif %}">
+        <i class="bi bi-calendar-check"></i> {{ mesos_pagats }}/12
+      </span>
+    </div>
+
+    <div class="carnet-footer">
+      <span>Alta: {{ soci.data_alta|date:"d/m/Y" }}</span>
+      {% if soci.tutor_legal %}
+      <span>Tutor: {{ soci.tutor_legal.nom_complet }}</span>
+      {% endif %}
+      <span>{{ any_actual }}</span>
+    </div>
+  </div>
+
+  <!-- Resum de documentació -->
+  <div class="card no-print" style="width:340px;">
+    <div class="card-header">Estat de la documentació</div>
+    <div class="card-body d-flex flex-column gap-2">
+      <div class="doc-indicator {% if soci.dni %}ok{% else %}ko{% endif %}">
+        <i class="bi bi-{% if soci.dni %}check-circle-fill{% else %}x-circle-fill{% endif %}"></i>
+        DNI / NIE: <strong>{{ soci.dni|default:"PENDENT" }}</strong>
+      </div>
+      <div class="doc-indicator {% if soci.te_curs_pirotecnia %}ok{% else %}ko{% endif %}">
+        <i class="bi bi-{% if soci.te_curs_pirotecnia %}check-circle-fill{% else %}x-circle-fill{% endif %}"></i>
+        Curs CREE
+        {% if soci.data_curs_pirotecnia %}· <small>{{ soci.data_curs_pirotecnia|date:"d/m/Y" }}</small>{% endif %}
+      </div>
+      <div class="doc-indicator {% if soci.proteccio_dades_firmada %}ok{% else %}ko{% endif %}">
+        <i class="bi bi-{% if soci.proteccio_dades_firmada %}check-circle-fill{% else %}x-circle-fill{% endif %}"></i>
+        Protecció de dades
+        {% if soci.data_proteccio_dades %}· <small>{{ soci.data_proteccio_dades|date:"d/m/Y" }}</small>{% endif %}
+      </div>
+      {% if soci.es_menor %}
+      <div class="doc-indicator {% if soci.tutor_legal %}ok{% else %}ko{% endif %}">
+        <i class="bi bi-{% if soci.tutor_legal %}check-circle-fill{% else %}x-circle-fill{% endif %}"></i>
+        Tutor legal: <strong>{{ soci.tutor_legal.nom_complet|default:"PENDENT" }}</strong>
+      </div>
+      <div class="doc-indicator {% if soci.permis_pare_signat %}ok{% else %}ko{% endif %}">
+        <i class="bi bi-{% if soci.permis_pare_signat %}check-circle-fill{% else %}x-circle-fill{% endif %}"></i>
+        Permís pare/mare
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</body>
+</html>

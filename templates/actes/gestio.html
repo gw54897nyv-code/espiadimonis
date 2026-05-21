@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Gestió d'actes — {{ conf.nom_colla }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2><i class="bi bi-journal-text text-warning"></i> Gestió d'actes</h2>
+  <a href="{% url 'actes_public' %}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-eye"></i> Vista pública
+  </a>
+</div>
+
+<!-- Formulari nova acta -->
+<div class="card border-0 shadow-sm mb-4" style="max-width:700px">
+  <div class="card-header fw-semibold"><i class="bi bi-plus-circle"></i> Publicar nova acta</div>
+  <div class="card-body p-4">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">Tipus *</label>
+          <select name="tipus" class="form-select">
+            {% for val, label in tipus_choices %}
+            <option value="{{ val }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">Data de la reunió *</label>
+          <input type="date" name="data" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-semibold d-block">&nbsp;</label>
+          <div class="form-check mt-2">
+            <input class="form-check-input" type="checkbox" name="publicat" id="publicat" checked>
+            <label class="form-check-label" for="publicat">Publicar immediatament</label>
+          </div>
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-semibold">Títol *</label>
+          <input type="text" name="titol" class="form-control" placeholder="p.ex. Acta reunió ordinària de colla — abril 2026" required>
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-semibold">Fitxer (PDF)</label>
+          <input type="file" name="fitxer" class="form-control" accept=".pdf,.doc,.docx">
+        </div>
+      </div>
+      <div class="mt-3">
+        <button type="submit" class="btn btn-danger"><i class="bi bi-upload"></i> Publicar acta</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Llista d'actes -->
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-dark">
+        <tr>
+          <th>Data</th>
+          <th>Tipus</th>
+          <th>Títol</th>
+          <th>Fitxer</th>
+          <th>Publicat</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for acta in actes %}
+        <tr>
+          <td>{{ acta.data|date:"d/m/Y" }}</td>
+          <td>
+            <span class="badge {% if acta.tipus == 'JUNTA' %}bg-danger{% else %}bg-primary{% endif %}">
+              {{ acta.get_tipus_display }}
+            </span>
+          </td>
+          <td>{{ acta.titol }}</td>
+          <td>
+            {% if acta.fitxer %}
+            <a href="{{ acta.fitxer.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-paperclip"></i>
+            </a>
+            {% else %}
+            <span class="text-muted small">—</span>
+            {% endif %}
+          </td>
+          <td>
+            <form method="post" action="{% url 'toggle_acta_publicat' acta.pk %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm {% if acta.publicat %}btn-success{% else %}btn-outline-secondary{% endif %}" title="{% if acta.publicat %}Ocultar{% else %}Publicar{% endif %}">
+                <i class="bi bi-{% if acta.publicat %}eye-fill{% else %}eye-slash{% endif %}"></i>
+              </button>
+            </form>
+          </td>
+          <td>
+            <form method="post" action="{% url 'eliminar_acta' acta.pk %}" class="d-inline" onsubmit="return confirm('Eliminar aquesta acta?')">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted py-4">Sense actes publicades.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

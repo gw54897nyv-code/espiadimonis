@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}{{ accio }} despesa — Espiadimonis{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center mb-4">
+  <a href="{% url 'llista_despeses' %}" class="btn btn-sm btn-outline-secondary me-3"><i class="bi bi-arrow-left"></i></a>
+  <h2 class="mb-0"><i class="bi bi-cart-dash text-warning"></i> {{ accio }} despesa</h2>
+</div>
+<div class="card border-0 shadow-sm" style="max-width:650px">
+  <div class="card-body p-4">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Data *</label>
+          {{ form.data }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Import (€) *</label>
+          {{ form.import_total }}
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-semibold">Descripció *</label>
+          {{ form.descripcio }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Proveïdor</label>
+          {{ form.proveidor }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Categoria</label>
+          {{ form.categoria }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Partida</label>
+          {{ form.partida }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Estat</label>
+          {{ form.estat }}
+        </div>
+        <div class="col-12">
+          <div class="form-check">
+            {{ form.amb_targeta_colla }}
+            <label class="form-check-label" for="{{ form.amb_targeta_colla.id_for_label }}">
+              Pagat amb la targeta de la colla
+            </label>
+          </div>
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-semibold">Ticket / factura adjunta</label>
+          {{ form.ticket }}
+        </div>
+      </div>
+      {% if form.errors %}
+      <div class="alert alert-danger mt-3">
+        <ul class="mb-0">{% for f,e in form.errors.items %}{% for err in e %}<li>{{ f }}: {{ err }}</li>{% endfor %}{% endfor %}</ul>
+      </div>
+      {% endif %}
+      <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-danger"><i class="bi bi-save"></i> Desar</button>
+        <a href="{% url 'llista_despeses' %}" class="btn btn-outline-secondary">Cancel·lar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

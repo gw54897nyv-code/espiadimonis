@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard Facturació — {{ conf.nom_colla }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0"><i class="bi bi-bar-chart-line text-brand-red"></i> Dashboard Facturació</h2>
+  <div class="d-flex gap-2 align-items-center">
+    <!-- Selector d'any -->
+    <form method="get" class="d-flex gap-2 align-items-center">
+      <select name="any" class="form-select form-select-sm" onchange="this.form.submit()" style="width:auto;">
+        {% for a in anys_disponibles %}
+        <option value="{{ a }}" {% if a == any_sel %}selected{% endif %}>{{ a }}</option>
+        {% endfor %}
+      </select>
+    </form>
+    <a href="{% url 'llista_factures' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-list-ul"></i> Llista
+    </a>
+    <a href="{% url 'crear_factura' %}" class="btn btn-brand btn-sm">
+      <i class="bi bi-plus-lg"></i> Nova factura
+    </a>
+  </div>
+</div>
+
+<!-- KPIs generals -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card text-center h-100" style="border-top:3px solid #0d6efd;">
+      <div class="card-body py-3">
+        <div class="text-muted small text-uppercase fw-semibold mb-1">Total facturat</div>
+        <div class="fs-4 fw-bold">{{ total_facturat|floatformat:2 }} €</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center h-100" style="border-top:3px solid #198754;">
+      <div class="card-body py-3">
+        <div class="text-muted small text-uppercase fw-semibold mb-1">Total cobrat</div>
+        <div class="fs-4 fw-bold text-success">{{ total_cobrat|floatformat:2 }} €</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center h-100" style="border-top:3px solid #ffc107;">
+      <div class="card-body py-3">
+        <div class="text-muted small text-uppercase fw-semibold mb-1">Pendent de cobrar</div>
+        <div class="fs-4 fw-bold text-warning">{{ total_pendent|floatformat:2 }} €</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center h-100" style="border-top:3px solid #dc3545;">
+      <div class="card-body py-3">
+        <div class="text-muted small text-uppercase fw-semibold mb-1">Total despeses</div>
+        <div class="fs-4 fw-bold text-danger">{{ total_despeses|floatformat:2 }} €</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Balanç general -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card h-100" style="border-top:3px solid {% if balanc_general >= 0 %}#198754{% else %}#dc3545{% endif %};">
+      <div class="card-body text-center py-4">
+        <div class="text-muted small text-uppercase fw-semibold mb-1">Balanç {{ any_sel }}</div>
+        <div class="fs-2 fw-bold {% if balanc_general >= 0 %}text-success{% else %}text-danger{% endif %}">
+          {% if balanc_general >= 0 %}+{% endif %}{{ balanc_general|floatformat:2 }} €
+        </div>
+        <small class="text-muted">Cobrat − Despeses</small>
+        {% if pendents_despeses > 0 %}
+        <div class="mt-2">
+          <a href="{% url 'llista_despeses' %}" class="badge bg-warning text-dark text-decoration-none">
+            <i class="bi bi-exclamation-triangle"></i>
+            {{ pendents_despeses }} despesa{% if pendents_despeses != 1 %}es{% endif %} pendent{% if pendents_despeses != 1 %}s{% endif %} de revisar
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-diagram-2"></i> Per partida — {{ any_sel }}</div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th>Partida</th>
+              <th class="text-end">Ingressos</th>
+              <th class="text-end">Despeses</th>
+              <th class="text-end">Balanç</th>
+              <th class="text-center">Factures</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in partides_data %}
+            <tr>
+              <td>
+                {% if p.codi == 'COLLA' %}
+                  <span class="badge" style="background:#8e44ad;">Colla</span>
+                {% elif p.codi == 'DIMONIS' %}
+                  <span class="badge bg-danger">Dimonis</span>
+                {% elif p.codi == 'BATUCADA' %}
+                  <span class="badge bg-dark">Batucada</span>
+                {% endif %}
+                {{ p.nom }}
+              </td>
+              <td class="text-end text-success fw-semibold">{{ p.ingressos|floatformat:2 }} €</td>
+              <td class="text-end text-danger fw-semibold">{{ p.despeses|floatformat:2 }} €</td>
+              <td class="text-end fw-bold {% if p.balanc >= 0 %}text-success{% else %}text-danger{% endif %}">
+                {% if p.balanc >= 0 %}+{% endif %}{{ p.balanc|floatformat:2 }} €
+              </td>
+              <td class="text-center">
+                <a href="{% url 'llista_factures' %}?partida={{ p.codi }}" class="badge bg-secondary text-decoration-none">
+                  {{ p.n_factures }}
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+            <!-- Total -->
+            <tr class="table-secondary fw-bold">
+              <td>Total</td>
+              <td class="text-end text-success">{{ total_facturat|floatformat:2 }} €</td>
+              <td class="text-end text-danger">{{ total_despeses|floatformat:2 }} €</td>
+              <td class="text-end {% if balanc_general >= 0 %}text-success{% else %}text-danger{% endif %}">
+                {% if balanc_general >= 0 %}+{% endif %}{{ balanc_general|floatformat:2 }} €
+              </td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Factures recents -->
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-clock-history"></i> Factures recents</span>
+    <a href="{% url 'llista_factures' %}" class="btn btn-sm btn-outline-secondary">Veure totes</a>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Número</th>
+          <th>Client</th>
+          <th>Data</th>
+          <th>Partida</th>
+          <th>Total</th>
+          <th>Estat</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in recents %}
+        <tr>
+          <td>
+            <a href="{% url 'detall_factura' f.pk %}" class="fw-semibold text-decoration-none">{{ f.numero }}</a>
+          </td>
+          <td>{{ f.client }}</td>
+          <td>{{ f.data|date:"d/m/Y" }}</td>
+          <td>
+            {% if f.partida == 'COLLA' %}
+              <span class="badge" style="background:#8e44ad;">Colla</span>
+            {% elif f.partida == 'DIMONIS' %}
+              <span class="badge bg-danger">Dimonis</span>
+            {% elif f.partida == 'BATUCADA' %}
+              <span class="badge bg-dark">Batucada</span>
+            {% else %}
+              <span class="text-muted small">—</span>
+            {% endif %}
+          </td>
+          <td class="fw-semibold">{{ f.total|floatformat:2 }} €</td>
+          <td>
+            {% if f.estat == 'PENDENT' %}
+              <span class="badge bg-warning text-dark">⏳ Pendent</span>
+            {% elif f.estat == 'PAGAT' %}
+              <span class="badge bg-success">✅ Pagat</span>
+            {% else %}
+              <span class="badge bg-secondary">❌ Cancel·lat</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            <a href="{% url 'pdf_factura' f.pk %}" class="btn btn-sm btn-outline-danger" target="_blank">
+              <i class="bi bi-file-pdf"></i>
+            </a>
+            <a href="{% url 'editar_factura' f.pk %}" class="btn btn-sm btn-outline-secondary ms-1">
+              <i class="bi bi-pencil"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center text-muted py-3">Sense factures.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
